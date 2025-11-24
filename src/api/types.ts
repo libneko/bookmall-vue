@@ -15,3 +15,10 @@ export interface LoginToken {
   name: string
   token: string
 }
+
+export interface RegisterForm{
+  username: string
+  password: string
+  name: string
+
+}

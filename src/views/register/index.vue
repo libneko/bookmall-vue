@@ -1,39 +1,30 @@
 <script setup lang="ts">
 import { loginApi } from '@/api/login'
-import type { LoginForm } from '@/api/types'
+import type { LoginForm, RegisterForm } from '@/api/types'
 import { ElMessage } from 'element-plus'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-let loginForm = ref<LoginForm>({ username: '', password: '' })
+let registerForm = ref<RegisterForm>({ username: '', password: '' , name: '' })
 const router = useRouter()
 
 
-// 登录
-const login = async () => {
+const register = async () => {
   // 登录
-  const result = await loginApi(loginForm.value)
-  if (result.code === 1) {
+  
     // 提示信息
-    ElMessage.success('登录成功')
+    ElMessage.success('注册成功')
     // 存储当前登录用户信息
-    localStorage.setItem('login_user', JSON.stringify(result.data))
+
     // 跳转页面 - 首页
-    router.push('index')
-  } else {
-    ElMessage.error(result.msg)
-  }
+    router.push('/login')
+
 }
 
-// 注册
-const register = () => {
-  router.push('/register')
+const login = () => {
+  router.push('/login')
 }
 
-// 重置
-const clear = () => {
-  loginForm.value = { username: '', password: '' }
-}
 </script>
 
 <template>
@@ -46,25 +37,27 @@ const clear = () => {
 
       <div class="login-form">
         <el-form label-width="80px">
-          <p class="title">欢迎回来</p>
+          <p class="title">加入大家庭</p>
           <el-form-item label="用户名" prop="username">
-            <el-input v-model="loginForm.username" placeholder="请输入用户名"></el-input>
+            <el-input v-model="registerForm.username" placeholder="请输入用户名"></el-input>
           </el-form-item>
 
           <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="loginForm.password" placeholder="请输入密码"></el-input>
+            <el-input type="password" v-model="registerForm.password" placeholder="请输入密码"></el-input>
+          </el-form-item>
+        
+          <el-form-item label="确认密码" prop="password">
+            <el-input type="password" v-model="registerForm.password" placeholder="请再输入密码"></el-input>
           </el-form-item>
 
           <el-form-item>
-            <el-button class="button" type="primary" @click="login">登 录</el-button>
-
+            <el-button class="button" type="primary" @click="register">注 册</el-button>
           </el-form-item>
         </el-form>
         <div class="auth-hints">
-          <span>没有账号喵？</span>
-          <a href="#" class="register" @click="register">注册</a>
-          <span class="sep">|</span>
-          <a href="#">找回密码</a>
+          <span>已有账号喵？</span>
+          <a href="#" class="register" @click="login">登录</a>
+
         </div>
       </div>
     </div>
