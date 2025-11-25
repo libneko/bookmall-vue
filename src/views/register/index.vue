@@ -5,34 +5,34 @@ import { ElMessage } from 'element-plus'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-let registerForm = ref<RegisterForm>({ username: '', password: '' , name: '' })
+let registerForm = ref<RegisterForm>({ username: '', password: '', name: '' })
 const router = useRouter()
-
 
 const register = async () => {
   // 登录
-  
-    // 提示信息
-    ElMessage.success('注册成功')
-    // 存储当前登录用户信息
 
-    // 跳转页面 - 首页
-    router.push('/login')
+  // 提示信息
+  ElMessage.success('注册成功')
+  // 存储当前登录用户信息
 
+  // 跳转页面 - 首页
+  router.push('/login')
 }
 
 const login = () => {
   router.push('/login')
 }
-
 </script>
 
 <template>
   <div id="container">
     <div class="login-card">
       <div class="login-image">
-        <img src="../../assets/227.png" alt="Login Image"
-          style="object-fit: cover; width: 100%; height: 100%; border-radius: 20px;" />
+        <img
+          src="../../assets/227.png"
+          alt="Login Image"
+          style="object-fit: cover; width: 100%; height: 100%; border-radius: 20px"
+        />
       </div>
 
       <div class="login-form">
@@ -43,11 +43,19 @@ const login = () => {
           </el-form-item>
 
           <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="registerForm.password" placeholder="请输入密码"></el-input>
+            <el-input
+              type="password"
+              v-model="registerForm.password"
+              placeholder="请输入密码"
+            ></el-input>
           </el-form-item>
-        
+
           <el-form-item label="确认密码" prop="password">
-            <el-input type="password" v-model="registerForm.password" placeholder="请再输入密码"></el-input>
+            <el-input
+              type="password"
+              v-model="registerForm.password"
+              placeholder="请再输入密码"
+            ></el-input>
           </el-form-item>
 
           <el-form-item>
@@ -57,7 +65,6 @@ const login = () => {
         <div class="auth-hints">
           <span>已有账号喵？</span>
           <a href="#" class="register" @click="login">登录</a>
-
         </div>
       </div>
     </div>
@@ -71,7 +78,6 @@ const login = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-
 }
 
 .login-card {
@@ -86,11 +92,9 @@ const login = () => {
 .login-image {
   width: 90%;
   height: 100%;
-
 }
 
 .login-form {
-
   max-width: 400px;
   max-height: 60%;
   padding: 50px;
@@ -116,17 +120,16 @@ const login = () => {
   width: 100px;
 }
 
-
 .auth-hints {
   text-align: center;
   margin-top: 12px;
   font-size: 14px;
-  color: rgba(148, 75, 75, 0.8)
+  color: rgba(148, 75, 75, 0.8);
 }
 
 .auth-hints a {
   cursor: pointer;
   color: rgba(148, 75, 75, 0.8);
-  margin: 0 6px
+  margin: 0 6px;
 }
 </style>

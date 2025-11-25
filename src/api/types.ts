@@ -16,9 +16,8 @@ export interface LoginToken {
   token: string
 }
 
-export interface RegisterForm{
+export interface RegisterForm {
   username: string
   password: string
   name: string
-
 }

@@ -7,6 +7,11 @@ import { useRouter } from 'vue-router'
 const login_name = ref('')
 const router = useRouter()
 
+// 跳转到购物车页面
+const goCart = () => {
+  router.push({ name: 'shopping-cart' })
+}
+
 onMounted(() => {
   const login_user = JSON.parse(localStorage.getItem('login_user')!)
   if (login_user && login_user.name) {
@@ -41,6 +46,9 @@ const logout = () => {
       <el-header class="header">
         <span class="title">小书架</span>
         <span class="right_tool">
+          <a href="javascript:void(0);" @click.prevent="goCart">
+            购物车 &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
+          </a>
           <a href="">
             <el-icon><EditPen /></el-icon> 修改密码 &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
           </a>
