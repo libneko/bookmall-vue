@@ -11,6 +11,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LayoutView from '@/views/layout/index.vue'
 import LoginView from '@/views/login/index.vue'
 import RegisterView from '@/views/register/index.vue'
+import ShoppingCartView from '@/views/shopping-cart/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,16 +20,17 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: LayoutView,
-      // children: [
-      //   { path: '/index', name: 'index', component: IndexView },
-      //   { path: '/clazz', name: 'clazz', component: ClazzView },
-      //   { path: '/stu', name: 'stu', component: Stuview },
-      //   { path: '/dept', name: 'dept', component: DeptView },
-      //   { path: '/emp', name: 'emp', component: EmpView },
-      //   { path: '/log', name: 'log', component: LogView },
-      //   { path: '/empReport', name: 'empReport', component: EmpReportView },
-      //   { path: '/stuReport', name: 'stuReport', component: StuReportView },
-      // ],
+      children: [
+        // { path: '/index', name: 'index', component: IndexView },
+        // { path: '/clazz', name: 'clazz', component: ClazzView },
+        // { path: '/stu', name: 'stu', component: Stuview },
+        // { path: '/dept', name: 'dept', component: DeptView },
+        // { path: '/emp', name: 'emp', component: EmpView },
+        // { path: '/log', name: 'log', component: LogView },
+        // { path: '/empReport', name: 'empReport', component: EmpReportView },
+        // { path: '/stuReport', name: 'stuReport', component: StuReportView },
+        { path: '/shopping-cart', name: 'shopping-cart', component: ShoppingCartView },
+      ],
     },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
