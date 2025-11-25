@@ -1,23 +1,64 @@
 <script setup lang="ts">
-import { loginApi } from '@/api/login'
 import type { LoginForm, RegisterForm } from '@/api/types'
 import { ElMessage } from 'element-plus'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import type { FormRules, FormInstance } from "element-plus";
 
 let registerForm = ref<RegisterForm>({ username: '', password: '', name: '' })
+
 const router = useRouter()
+
+const formRef = ref<FormInstance>();
+
+const passwordForm = reactive({
+  password: "",
+  confirmPassword: ""
+});
 
 const register = async () => {
   // 登录
-
+  console.log(registerForm.value);
   // 提示信息
   ElMessage.success('注册成功')
   // 存储当前登录用户信息
 
   // 跳转页面 - 首页
   router.push('/login')
+
+  // 跳转页面 - 首页
+  router.push('/login')
 }
+
+// 自定义校验器：检查两次密码是否一致
+const validateConfirmPassword = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    ElMessage.error("请再次输入密码");
+  } else if (value !== passwordForm.password) {
+    ElMessage.error("两次输入的密码不一致");
+  }
+};
+
+const submit = () => {
+  formRef.value?.validate((valid) => {
+    if (valid) {
+      console.log("校验通过，可以提交");
+      registerForm.value.password = passwordForm.password;
+      register();
+    }
+  });
+};
+
+
+const rules = reactive<FormRules>({
+  password: [
+    { required: true, message: "请输入密码", trigger: "blur" }
+  ],
+  confirmPassword: [
+    { validator: validateConfirmPassword, trigger: "blur" }
+  ]
+});
+
 
 const login = () => {
   router.push('/login')
@@ -36,30 +77,22 @@ const login = () => {
       </div>
 
       <div class="login-form">
-        <el-form label-width="80px">
+        <el-form :model="passwordForm" :rules="rules" ref="formRef" label-width="80px">
           <p class="title">加入大家庭</p>
           <el-form-item label="用户名" prop="username">
             <el-input v-model="registerForm.username" placeholder="请输入用户名"></el-input>
           </el-form-item>
 
           <el-form-item label="密码" prop="password">
-            <el-input
-              type="password"
-              v-model="registerForm.password"
-              placeholder="请输入密码"
-            ></el-input>
+            <el-input type="password" v-model="passwordForm.password" placeholder="请输入密码"></el-input>
           </el-form-item>
 
-          <el-form-item label="确认密码" prop="password">
-            <el-input
-              type="password"
-              v-model="registerForm.password"
-              placeholder="请再输入密码"
-            ></el-input>
+          <el-form-item label="确认密码" prop="confirmPassword">
+            <el-input type="password" v-model="passwordForm.confirmPassword" placeholder="请再输入密码"></el-input>
           </el-form-item>
 
           <el-form-item>
-            <el-button class="button" type="primary" @click="register">注 册</el-button>
+            <el-button class="button" type="primary" @click="submit">注 册</el-button>
           </el-form-item>
         </el-form>
         <div class="auth-hints">
