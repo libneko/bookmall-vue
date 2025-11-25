@@ -231,7 +231,6 @@ const removeItem = async (id: number) => {
       const index = store.items.findIndex((item: Product) => item.id === id)
       if (index !== -1) {
         const itemName = store.items[index]?.name
-        // const itemName = '222'
         store.items.splice(index, 1)
 
         // 如果店铺没有商品了，移除该店铺
