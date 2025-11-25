@@ -8,7 +8,6 @@ import { useRouter } from 'vue-router'
 let loginForm = ref<LoginForm>({ username: '', password: '' })
 const router = useRouter()
 
-
 // 登录
 const login = async () => {
   // 登录
@@ -40,8 +39,11 @@ const clear = () => {
   <div id="container">
     <div class="login-card">
       <div class="login-image">
-        <img src="../../assets/227.png" alt="Login Image"
-          style="object-fit: cover; width: 100%; height: 100%; border-radius: 20px;" />
+        <img
+          src="../../assets/227.png"
+          alt="Login Image"
+          style="object-fit: cover; width: 100%; height: 100%; border-radius: 20px"
+        />
       </div>
 
       <div class="login-form">
@@ -52,12 +54,16 @@ const clear = () => {
           </el-form-item>
 
           <el-form-item label="密码" prop="password">
-            <el-input type="password" v-model="loginForm.password" placeholder="请输入密码"></el-input>
+            <el-input
+              type="password"
+              v-model="loginForm.password"
+              placeholder="请输入密码"
+              show-password
+            ></el-input>
           </el-form-item>
 
           <el-form-item>
             <el-button class="button" type="primary" @click="login">登 录</el-button>
-
           </el-form-item>
         </el-form>
         <div class="auth-hints">
@@ -74,11 +80,10 @@ const clear = () => {
 <style scoped>
 #container {
   min-height: 100vh;
-  background-color: rgba(245, 196, 196, 0.8);
+  background-color: rgba(250, 204, 204, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-
 }
 
 .login-card {
@@ -93,11 +98,9 @@ const clear = () => {
 .login-image {
   width: 90%;
   height: 100%;
-
 }
 
 .login-form {
-
   max-width: 400px;
   max-height: 60%;
   padding: 50px;
@@ -108,6 +111,17 @@ const clear = () => {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   background-color: rgba(255, 255, 255, 0.8);
   margin-left: -50px;
+}
+:deep(.el-input__suffix) {
+  position: absolute;
+  right: 10px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.el-input__wrapper) {
+  padding-right: 40px !important;
 }
 
 .title {
@@ -123,17 +137,16 @@ const clear = () => {
   width: 100px;
 }
 
-
 .auth-hints {
   text-align: center;
   margin-top: 12px;
   font-size: 14px;
-  color: rgba(148, 75, 75, 0.8)
+  color: rgba(148, 75, 75, 0.8);
 }
 
 .auth-hints a {
   cursor: pointer;
   color: rgba(148, 75, 75, 0.8);
-  margin: 0 6px
+  margin: 0 6px;
 }
 </style>
