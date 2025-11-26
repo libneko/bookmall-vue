@@ -31,15 +31,11 @@ const register = async () => {
 const validateConfirmPassword = (rule: any, value: string, callback: any) => {
   if (!value) {
     ElMessage.error('请再次输入密码')
-  }
-  else if (value.length < 8) {
+  } else if (value.length < 8) {
     ElMessage.error('密码长度不能少于8位')
-  }
-  else if (value.length > 20) {
+  } else if (value.length > 20) {
     ElMessage.error('密码长度不能超过20位')
-  }
-
-  else if (value !== passwordForm.password) {
+  } else if (value !== passwordForm.password) {
     ElMessage.error('两次输入的密码不一致')
   }
 }
@@ -125,7 +121,7 @@ const login = () => {
 }
 
 .login-card {
-  width: 1150px;
+  width: 80%;
   border-radius: 20px;
   display: flex;
   flex-direction: row;
@@ -139,8 +135,6 @@ const login = () => {
 }
 
 .login-form {
-  max-width: 400px;
-  max-height: 60%;
   padding: 50px;
   margin: 0 auto;
 
@@ -173,12 +167,12 @@ const login = () => {
 
 .button {
   margin-top: 30px;
-  width: 100px;
+  width: 60%;
 }
 
 .auth-hints {
   text-align: center;
-  margin-top: 12px;
+  margin-top: 9%;
   font-size: 14px;
   color: rgba(148, 75, 75, 0.8);
 }

@@ -12,6 +12,8 @@ import LayoutView from '@/views/layout/index.vue'
 import LoginView from '@/views/login/index.vue'
 import RegisterView from '@/views/register/index.vue'
 import ShoppingCartView from '@/views/shopping-cart/index.vue'
+import SearchView from '@/views/search/index.vue'
+import IntroductionView from '@/views/Introduction/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,7 +31,24 @@ const router = createRouter({
         // { path: '/log', name: 'log', component: LogView },
         // { path: '/empReport', name: 'empReport', component: EmpReportView },
         // { path: '/stuReport', name: 'stuReport', component: StuReportView },
-        { path: '/shopping-cart', name: 'shopping-cart', component: ShoppingCartView },
+        {
+          path: '/shopping-cart',
+          name: 'shopping-cart',
+          component: ShoppingCartView,
+          meta: { title: '我的购物车' },
+        },
+        {
+          path: '/search',
+          name: 'search',
+          component: SearchView,
+          meta: { title: '搜索' },
+        },
+        {
+          path: '/introduction',
+          name: 'introduction',
+          component: IntroductionView,
+          meta: { title: '书本详情' },
+        },
       ],
     },
     { path: '/login', name: 'login', component: LoginView },

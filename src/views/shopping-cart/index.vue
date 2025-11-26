@@ -405,7 +405,6 @@ onMounted(() => {
   <div class="shopping-cart">
     <!-- 顶部标题栏 -->
     <div class="cart-header">
-      <h2>我的购物车</h2>
       <div class="header-actions">
         <span class="selected-count">已选 {{ selectedCount }} 件商品</span>
       </div>
@@ -442,9 +441,6 @@ onMounted(() => {
             <span class="store-name">{{ store.name }}</span>
             <el-tag size="small" type="info">店铺</el-tag>
             <el-button link type="primary" size="small" class="store-action"> 联系客服 </el-button>
-          </div>
-          <div class="store-promotion" v-if="store.promotion">
-            <el-tag size="small" type="success">{{ store.promotion }}</el-tag>
           </div>
         </div>
 
@@ -494,9 +490,6 @@ onMounted(() => {
               <!-- 单价 -->
               <div class="item-price">
                 <span class="current-price">¥{{ item.price.toFixed(2) }}</span>
-                <span v-if="item.originalPrice > item.price" class="original-price">
-                  ¥{{ item.originalPrice.toFixed(2) }}
-                </span>
               </div>
 
               <!-- 数量控制 -->
@@ -517,9 +510,6 @@ onMounted(() => {
                 <span class="subtotal-amount">
                   ¥{{ (item.price * item.quantity).toFixed(2) }}
                 </span>
-                <div v-if="item.originalPrice > item.price" class="discount-info">
-                  立省 ¥{{ ((item.originalPrice - item.price) * item.quantity).toFixed(2) }}
-                </div>
               </div>
 
               <!-- 操作按钮 -->
@@ -540,9 +530,6 @@ onMounted(() => {
           <div class="store-total">
             <span>本店合计：</span>
             <span class="store-total-price">¥{{ getStoreTotalPrice(store).toFixed(2) }}</span>
-            <span class="store-discount" v-if="getStoreDiscount(store) > 0">
-              （已省 ¥{{ getStoreDiscount(store).toFixed(2) }}）
-            </span>
           </div>
         </div>
       </div>
@@ -612,6 +599,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-left: 30px;
   margin-bottom: 20px;
   padding-bottom: 15px;
   border-bottom: 1px solid #e8e8e8;

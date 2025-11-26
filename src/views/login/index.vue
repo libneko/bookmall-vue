@@ -87,7 +87,7 @@ const clear = () => {
 }
 
 .login-card {
-  width: 1150px;
+  width: 80%;
   border-radius: 20px;
   display: flex;
   flex-direction: row;
@@ -101,8 +101,6 @@ const clear = () => {
 }
 
 .login-form {
-  max-width: 400px;
-  max-height: 60%;
   padding: 50px;
   margin: 0 auto;
 
@@ -134,12 +132,12 @@ const clear = () => {
 
 .button {
   margin-top: 30px;
-  width: 100px;
+  width: 60%;
 }
 
 .auth-hints {
   text-align: center;
-  margin-top: 12px;
+  margin-top: 9%;
   font-size: 14px;
   color: rgba(148, 75, 75, 0.8);
 }
