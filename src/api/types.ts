@@ -21,3 +21,16 @@ export interface RegisterForm {
   password: string
   name: string
 }
+
+export interface Book{
+  id: number
+  name: string
+  category: string
+  price: number
+  image: string
+  description: string
+  staus: string
+
+
+}
+

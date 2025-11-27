@@ -40,7 +40,7 @@ const clear = () => {
     <div class="login-card">
       <div class="login-image">
         <img
-          src="../../assets/227.png"
+          src="https://neko-book.oss-cn-hangzhou.aliyuncs.com/background.jpg"
           alt="Login Image"
           style="object-fit: cover; width: 100%; height: 100%; border-radius: 20px"
         />
