@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
-// import IndexView from '@/views/index/index.vue'
+import IndexView from '@/views/index/index.vue'
 // import ClazzView from '@/views/clazz/index.vue'
 // import DeptView from '@/views/dept/index.vue'
 // import EmpView from '@/views/emp/index.vue'
@@ -23,7 +23,7 @@ const router = createRouter({
       name: 'home',
       component: LayoutView,
       children: [
-        // { path: '/index', name: 'index', component: IndexView },
+         { path: '/index', name: 'index', component: IndexView },
         // { path: '/clazz', name: 'clazz', component: ClazzView },
         // { path: '/stu', name: 'stu', component: Stuview },
         // { path: '/dept', name: 'dept', component: DeptView },

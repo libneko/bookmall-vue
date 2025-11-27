@@ -22,15 +22,27 @@ export interface RegisterForm {
   name: string
 }
 
-export interface Book{
+export interface BookStock {
+  id: number
+  book_id: number
+  stock: number
+}
+
+export interface Book {
   id: number
   name: string
-  category: string
+  author: string
+  category_id: string
   price: number
   image: string
   description: string
-  staus: string
-
-
+  status: string
+  book_stock: BookStock
 }
 
+export interface Category {
+  id: number
+  name: string
+  sort: number
+  status: number
+}
