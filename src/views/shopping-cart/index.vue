@@ -2,6 +2,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Picture } from '@element-plus/icons-vue'
+import {
+  getShoppingCartApi,
+  updateCartItemApi,
+  deleteCartItemApi,
+  clearCartApi,
+} from '@/api/shopping-cart'
+import type { ApiResponse, ShoppingCartItem, UpdateCartForm } from '@/api/types'
 
 // 定义商品类型
 interface Product {
@@ -29,92 +36,85 @@ interface Store {
   items: Product[]
 }
 
+// 加载状态
+const loading = ref(false)
+
 // 店铺数据类型定义
 const storeGroups = ref<Store[]>([
   {
     id: 1,
-    name: '电子元件旗舰店',
+    name: '小书架专卖店',
     selected: false,
     indeterminate: false,
     promotion: '满50元包邮',
-    items: [
-      {
-        id: 1,
-        storeId: 1,
-        name: 'TB6612FNG双路直流电机驱动模块',
-        image: 'src/assets/TB6612FNG双路直流电机驱动模块.png',
-        price: 15.76,
-        originalPrice: 20.02,
-        quantity: 1,
-        stock: 50,
-        selected: true,
-        specifications: ['颜色分类：焊接排针TB6612双路驱动模块'],
-        freeShipping: true,
-        guarantee: true,
-      },
-      {
-        id: 2,
-        storeId: 1,
-        name: '5V继电器模块带光耦',
-        image: 'src/assets/5V继电器模块带光耦.png',
-        price: 8.9,
-        originalPrice: 10.5,
-        quantity: 3,
-        stock: 100,
-        selected: true,
-        specifications: ['颜色分类：5V单路继电器模块'],
-        freeShipping: true,
-        guarantee: true,
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: 'STM32开发板专卖店',
-    selected: false,
-    indeterminate: false,
-    promotion: '买二送一',
-    items: [
-      {
-        id: 3,
-        storeId: 2,
-        name: 'STM32F103C8T6最小系统板开发板',
-        image: 'https://via.placeholder.com/80',
-        price: 16.48,
-        originalPrice: 19.96,
-        quantity: 2,
-        stock: 100,
-        selected: true,
-        specifications: ['颜色分类：进口芯片STM32F103C8T6'],
-        freeShipping: true,
-        guarantee: true,
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Arduino官方旗舰店',
-    selected: false,
-    indeterminate: false,
-    promotion: '新店开业8折优惠',
-    items: [
-      {
-        id: 4,
-        storeId: 3,
-        name: 'Arduino UNO R3开发板兼容套件',
-        image: 'https://via.placeholder.com/80',
-        price: 25.8,
-        originalPrice: 25.8,
-        quantity: 1,
-        stock: 30,
-        selected: false,
-        specifications: ['颜色分类：基础版+数据线'],
-        freeShipping: false,
-        guarantee: true,
-      },
-    ],
+    items: [],
   },
 ])
+
+// 数据转换函数：将后端ShoppingCartItem转换为前端Product
+const transformBackendItemToProduct = (backendItem: ShoppingCartItem, storeId: number): Product => {
+  // // 计算单价：总金额 / 数量
+  // const unitPrice = backendItem.amount / backendItem.number
+
+  return {
+    id: backendItem.id,
+    storeId: storeId,
+    name: backendItem.name,
+    image: backendItem.image,
+    price: backendItem.amount, // 单价
+    originalPrice: backendItem.amount * 1.2, // 原价比现价高20%
+    quantity: backendItem.number, // 对应后端的number字段
+    stock: 100, // 默认库存，实际应从商品接口获取
+    selected: true, // 默认选中
+    specifications: ['默认规格'], // 需要从商品详情获取
+    freeShipping: backendItem.amount > 10, // 单价大于10元免运费
+    guarantee: true, // 默认有保障
+  }
+}
+
+// 获取购物车数据 - 增强错误处理
+const fetchShoppingCartData = async () => {
+  loading.value = true
+  try {
+    const response: ApiResponse<ShoppingCartItem[]> = await getShoppingCartApi()
+
+    if (response.code === 1 && response.data && Array.isArray(response.data)) {
+      // 确保storeGroups有数据
+      if (storeGroups.value.length === 0) {
+        storeGroups.value.push({
+          id: 1,
+          name: '小书架专卖店',
+          selected: false,
+          indeterminate: false,
+          promotion: '满50元包邮',
+          items: [],
+        })
+      }
+
+      // 清空并重新填充数据
+      storeGroups.value[0]!.items = response.data.map((item: ShoppingCartItem) =>
+        transformBackendItemToProduct(item, storeGroups.value[0]!.id),
+      )
+
+      // 更新选择状态
+      updateStoreIndeterminate(storeGroups.value[0]!)
+      updateSelectAll()
+
+      ElMessage.success(`成功加载 ${response.data.length} 件商品`)
+    } else {
+      ElMessage.error(response.msg || '获取购物车数据失败')
+    }
+  } catch (error) {
+    console.error('获取购物车数据失败:', error)
+    ElMessage.error('网络错误，请稍后重试')
+    // 错误时清空数据
+    if (storeGroups.value.length > 0) {
+      storeGroups.value[0]!.items = []
+    }
+  } finally {
+    loading.value = false
+  }
+}
 
 // 计算属性 - 所有商品列表
 const cartItems = computed<Product[]>(() => {
@@ -211,14 +211,32 @@ const handleItemSelectChange = (store: Store) => {
   updateSelectAll()
 }
 
-// 方法 - 处理数量变化
-const handleQuantityChange = (item: Product) => {
+// 方法 - 处理数量变化（调用API）
+const handleQuantityChange = async (item: Product) => {
   if (item.quantity < 1) item.quantity = 1
   if (item.quantity > item.stock) item.quantity = item.stock
-  ElMessage.success(`已更新 ${item.name} 的数量`)
+
+  try {
+    const response = await updateCartItemApi({
+      id: item.id,
+      number: item.quantity,
+    })
+
+    if (response.code === 200) {
+      ElMessage.success(`已更新 ${item.name} 的数量`)
+    } else {
+      ElMessage.error(response.msg || '更新数量失败')
+      // 失败时重新获取数据恢复状态
+      await fetchShoppingCartData()
+    }
+  } catch (error) {
+    console.error('更新数量失败:', error)
+    ElMessage.error('更新失败，请稍后重试')
+    await fetchShoppingCartData()
+  }
 }
 
-// 方法 - 删除商品
+// 方法 - 删除商品（调用API）
 const removeItem = async (id: number) => {
   try {
     await ElMessageBox.confirm('确定要删除这个商品吗？', '提示', {
@@ -227,24 +245,14 @@ const removeItem = async (id: number) => {
       type: 'warning',
     })
 
-    for (const store of storeGroups.value) {
-      const index = store.items.findIndex((item: Product) => item.id === id)
-      if (index !== -1) {
-        const itemName = store.items[index]?.name
-        store.items.splice(index, 1)
+    const response = await deleteCartItemApi(id)
 
-        // 如果店铺没有商品了，移除该店铺
-        if (store.items.length === 0) {
-          const storeIndex = storeGroups.value.findIndex((s: Store) => s.id === store.id)
-          storeGroups.value.splice(storeIndex, 1)
-        } else {
-          updateStoreIndeterminate(store)
-        }
-
-        ElMessage.success(`已删除商品：${itemName}`)
-        updateSelectAll()
-        break
-      }
+    if (response.code === 200) {
+      // 删除成功后重新获取数据
+      await fetchShoppingCartData()
+      ElMessage.success('商品删除成功')
+    } else {
+      ElMessage.error(response.msg || '删除商品失败')
     }
   } catch {
     ElMessage.info('已取消删除')
@@ -259,7 +267,7 @@ const moveToFavorites = (id: number) => {
   }
 }
 
-// 方法 - 清空购物车
+// 方法 - 清空购物车（调用API）
 const clearCart = async () => {
   if (cartItems.value.length === 0) {
     ElMessage.warning('购物车已经是空的')
@@ -273,70 +281,46 @@ const clearCart = async () => {
       type: 'warning',
     })
 
-    storeGroups.value = []
-    ElMessage.success('购物车已清空')
+    const response = await clearCartApi()
+
+    if (response.code === 200) {
+      // storeGroups.value[0].items = []
+      storeGroups.value[0]!.items = []
+      ElMessage.success('购物车已清空')
+    } else {
+      ElMessage.error(response.msg || '清空购物车失败')
+    }
   } catch {
     ElMessage.info('已取消清空操作')
   }
 }
 
-// 方法 - 添加到购物车（更安全的实现）
-const addToCart = (product: Product) => {
-  // 确保 storeGroups.value 已初始化
-  if (!storeGroups.value) {
-    storeGroups.value = []
-  }
+// // 方法 - 添加到购物车（调用API）
+// const addToCart = async (product: Omit<Product, 'id' | 'storeId' | 'selected'>) => {
+//   try {
+//     const response = await addToCartApi({
+//       book_id: product.name.includes('TB6612')
+//         ? 1
+//         : product.name.includes('STM32')
+//           ? 2
+//           : product.name.includes('Arduino')
+//             ? 3
+//             : 4, // 模拟book_id
+//       number: product.quantity,
+//     })
 
-  // 查找或创建目标店铺
-  let targetStore = storeGroups.value[0]
-
-  if (!targetStore) {
-    // 如果购物车为空，创建一个新店铺
-    targetStore = {
-      id: Date.now(),
-      name: product.name ? `${product.name}的相关店铺` : '默认店铺',
-      selected: false,
-      indeterminate: false,
-      promotion: '',
-      items: [],
-    }
-    storeGroups.value.push(targetStore)
-  }
-
-  // 确保 items 数组已初始化
-  if (!targetStore.items) {
-    targetStore.items = []
-  }
-
-  // 使用可选链操作符更安全地查找商品
-  const existingItem = targetStore.items.find(
-    (item: Product) => item?.name === product?.name && item?.price === product?.price,
-  )
-
-  if (existingItem) {
-    existingItem.quantity += 1
-    ElMessage.success(`已增加 ${product.name} 的数量`)
-  } else {
-    targetStore.items.push({
-      id: Date.now(),
-      storeId: targetStore.id,
-      name: product.name || '未知商品',
-      image: product.image || 'https://via.placeholder.com/80',
-      price: product.price || 0,
-      originalPrice: product.price || 0,
-      quantity: 1,
-      stock: 50,
-      selected: true,
-      specifications: product.specifications || ['标准配置'],
-      freeShipping: product.freeShipping ?? true,
-      guarantee: product.guarantee ?? true,
-    })
-    ElMessage.success(`已添加 ${product.name} 到购物车`)
-  }
-
-  updateStoreIndeterminate(targetStore)
-  updateSelectAll()
-}
+//     if (response.code === 200) {
+//       // 添加成功后重新获取购物车数据
+//       await fetchShoppingCartData()
+//       ElMessage.success(`已添加 ${product.name} 到购物车`)
+//     } else {
+//       ElMessage.error(response.msg || '添加商品失败')
+//     }
+//   } catch (error) {
+//     console.error('添加商品失败:', error)
+//     ElMessage.error('添加商品失败，请稍后重试')
+//   }
+// }
 
 // 方法 - 获取店铺总价
 const getStoreTotalPrice = (store: Store) => {
@@ -367,7 +351,9 @@ const handleCheckout = () => {
   const totalAmount = totalPrice.value
 
   ElMessageBox.confirm(
-    `确认结算 ${selectedCount.value} 件商品（${selectedStores.length} 家店铺），总金额：¥${totalAmount.toFixed(2)}`,
+    `确认结算 ${selectedCount.value} 件商品（${
+      selectedStores.length
+    } 家店铺），总金额：¥${totalAmount.toFixed(2)}`,
     '确认结算',
     {
       confirmButtonText: '去支付',
@@ -390,17 +376,29 @@ const goShopping = () => {
   // 实际项目中这里会有路由跳转逻辑
 }
 
+// 模拟添加测试数据的方法（开发用）
+const addTestData = () => {
+  const testProduct: Omit<Product, 'id' | 'storeId' | 'selected'> = {
+    name: '测试商品',
+    image: 'https://via.placeholder.com/80',
+    price: 29.9,
+    originalPrice: 35.9,
+    quantity: 1,
+    stock: 50,
+    specifications: ['测试规格'],
+    freeShipping: true,
+    guarantee: true,
+  }
+  //   addToCart(testProduct)
+}
+
 // 生命周期
 onMounted(() => {
   console.log('购物车组件已加载')
-  // 初始化店铺的选择状态
-  storeGroups.value.forEach((store: Store) => {
-    updateStoreIndeterminate(store)
-  })
-  updateSelectAll()
+  // 从后端API获取数据
+  fetchShoppingCartData()
 })
 </script>
-
 <template>
   <div class="shopping-cart">
     <!-- 顶部标题栏 -->

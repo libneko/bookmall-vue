@@ -50,3 +50,21 @@ export interface Category {
 export interface Addshopping {
   book_id: number
 }
+
+// 根据图片添加购物车相关接口
+export interface ShoppingCartItem {
+  id: number
+  name: string
+  user_id: number
+  book_id: number
+  number: number // 数量
+  amount: number // 金额
+  image: string
+  create_time: string
+}
+
+//更新购物车
+export interface UpdateCartForm {
+  id: number
+  number: number
+}
