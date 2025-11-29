@@ -52,9 +52,8 @@ const getRandomItems = <T,>(arr: T[], n: number): T[] => {
 }
 
 const loadData = async () => {
-  let bookRes = await getBooks()
-  console.log(bookRes)
-  books.value = bookRes.data
+  categories.value = (await getCategories()).data
+  books.value = (await getBooks()).data
 
   const bannerBooks = getRandomItems(books.value, Math.min(3, books.value.length))
   banners.value = bannerBooks.map((book, index) => ({
@@ -153,7 +152,7 @@ onUnmounted(() => {
             @click="openGoods(goods)"
           >
             <el-card class="goods-card">
-              <el-image :src="goods.imgUrl" :alt="goods.name" class="goods-img" fit="contain"/>
+              <el-image :src="goods.imgUrl" :alt="goods.name" class="goods-img" fit="contain" />
               <div class="goods-info">
                 <div class="goods-name">{{ goods.name }}</div>
                 <div class="goods-price">¥{{ goods.price }}</div>

@@ -23,7 +23,7 @@ const router = createRouter({
       name: 'home',
       component: LayoutView,
       children: [
-         { path: '/index', name: 'index', component: IndexView },
+        { path: '/index', name: 'index', component: IndexView },
         // { path: '/clazz', name: 'clazz', component: ClazzView },
         // { path: '/stu', name: 'stu', component: Stuview },
         // { path: '/dept', name: 'dept', component: DeptView },

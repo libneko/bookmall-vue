@@ -46,7 +46,7 @@ export interface Category {
   sort: number
   status: number
 }
-}
+
 export interface Addshopping {
   book_id: number
 }
