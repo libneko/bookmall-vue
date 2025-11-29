@@ -48,6 +48,7 @@ const router = createRouter({
           name: 'introduction',
           component: IntroductionView,
           meta: { title: '书本详情' },
+          props: true,
         },
       ],
     },

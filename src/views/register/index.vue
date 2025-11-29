@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type {  RegisterForm } from '@/api/types'
+import type { RegisterForm } from '@/api/types'
 import { ElMessage } from 'element-plus'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -29,13 +29,10 @@ const register = async () => {
     // 存储当前登录用户信息
 
     // 跳转页面 - 首页
-    router.push('/login')    
-  }
-  else {
+    router.push('/login')
+  } else {
     ElMessage.success('传输注册数据失败')
   }
-
-
 }
 
 // 自定义校验器：检查两次密码是否一致
