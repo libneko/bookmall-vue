@@ -8,5 +8,5 @@ export const getCategories = (): Promise<ApiResponse<Category[]>> => {
 
 // 获取 book
 export const getBooks = (): Promise<ApiResponse<Book[]>> => {
-  return request.get('/admin/book/list')
+  return request.get('/user/book/list')
 }

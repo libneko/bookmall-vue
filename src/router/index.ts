@@ -44,7 +44,7 @@ const router = createRouter({
           meta: { title: '搜索' },
         },
         {
-          path: '/introduction',
+          path: '/introduction/:id',
           name: 'introduction',
           component: IntroductionView,
           meta: { title: '书本详情' },

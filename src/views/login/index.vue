@@ -11,7 +11,9 @@ const router = useRouter()
 // 登录
 const login = async () => {
   // 登录
+  console.log(loginForm.value)
   const result = await loginApi(loginForm.value)
+  console.log(result.code)
   if (result.code === 1) {
     // 提示信息
     ElMessage.success('登录成功')

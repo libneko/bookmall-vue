@@ -3,10 +3,11 @@ import { ElMessage, type ImageProps } from 'element-plus'
 import { bookApi } from '@/api/introduction'
 import type { Addshopping, Book } from '@/api/types'
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter,useRoute } from 'vue-router'
 import { shop } from '@/api/shopping-cart'
 
 const router = useRouter()
+const route = useRoute()   // ⭐ 获取路由参数
 
 let book = ref<Book>()
 let shopp = ref<Addshopping>({
@@ -15,7 +16,8 @@ let shopp = ref<Addshopping>({
 let book_id: number
 const num = ref(1)
 onMounted(async () => {
-  const res = await bookApi(1)
+  const id = Number(route.params.id)
+  const res = await bookApi(id)
   console.log(res)
   book.value = res.data
   book_id = book.value.id
@@ -26,9 +28,15 @@ const addShopping = async (book_id: Addshopping) => {
   try {
     console.log(book_id)
     const res = await shop(book_id)
-    console.log('加入成功:', res)
+    console.log(res)
     // 成功提示
-    ElMessage.success('已加入购物车')
+    if (res.code != 0) {
+      console.log('加入成功:', res)
+      ElMessage.success('已加入购物车')
+    }
+    else {
+      ElMessage.error('加入失败')
+    }
   } catch (err) {
     console.error(err)
     ElMessage.error('加入失败')
@@ -98,9 +106,10 @@ const handleChange = (value: number | undefined) => {
 
 .books {
   width: 90%;
-  height: 80%;
+  min-height: 80%;
   display: flex;
   overflow: hidden;
+  height: auto;
 
   background-color: rgba(62, 60, 60, 0.2);
   border: 2px solid #ccc; /* 淡灰色更柔和 */
@@ -173,6 +182,7 @@ const handleChange = (value: number | undefined) => {
   padding-top: 20%;
   font-size: 150%;
   width: 100%;
+
   height: 15%;
   font-weight: bold;
   display: flex;

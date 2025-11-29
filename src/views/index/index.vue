@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getCategories, getBooks } from '@/api/home'
+import { getBooks, getCategories} from '@/api/home'
 import type { Book, Category } from '@/api/types'
+import BookCard from '@/component/book.vue'
 
 interface Banner {
   id: number
@@ -13,7 +14,6 @@ interface Goods {
   id: number
   name: string
   price: number
-  sales: string
   imgUrl: string
 }
 
@@ -76,7 +76,7 @@ const loadData = async () => {
 const router = useRouter()
 
 const openGoods = (g: Goods) => {
-  router.push(`/goods/${g.id}`)
+  router.push(`/introduction/${g.id}`)
 }
 
 // Banner轮播逻辑
@@ -151,14 +151,7 @@ onUnmounted(() => {
             class="goods-card-col"
             @click="openGoods(goods)"
           >
-            <el-card class="goods-card">
-              <el-image :src="goods.imgUrl" :alt="goods.name" class="goods-img" fit="contain" />
-              <div class="goods-info">
-                <div class="goods-name">{{ goods.name }}</div>
-                <div class="goods-price">¥{{ goods.price }}</div>
-                <div class="goods-sales">已售{{ goods.sales }}</div>
-              </div>
-            </el-card>
+          <BookCard :book="goods"/>
           </div>
         </div>
       </div>
@@ -172,7 +165,6 @@ onUnmounted(() => {
         <el-link href="#">联系方式</el-link>
         <el-link href="#">售后服务</el-link>
       </div>
-      <div class="footer-copyright">版权所有 © 2025 小书架风格电商平台 - 仅供学习使用</div>
       <div class="footer-icon">
         <el-icon class="icon"><weixin /></el-icon>
         <el-icon class="icon"><alipay /></el-icon>
@@ -186,83 +178,14 @@ onUnmounted(() => {
 /* 关键修改：全局禁用滚动条（包括body和根容器） */
 /* 1. 禁用根组件的滚动 */
 .home {
-  padding-top: 185px;
-  padding-left: 20%;
   overflow: hidden; /* 核心：隐藏根容器滚动 */
-  height: 100vh; /* 确保根容器占满视口高度 */
-}
-
-/* 2. 禁用body的滚动（防止全局滚动条） */
-::v-deep body {
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-}
-
-/* 顶部快捷导航 */
-.top-nav {
-  background-color: #f5f5f5;
-  padding: 0 40px;
-  height: 40px;
-  line-height: 40px;
-}
-.nav-link {
-  margin: 0 10px;
-  color: #666;
-  font-size: 12px;
-}
-.nav-link:hover {
-  color: #ff4400;
-}
-
-/* 主导航栏 */
-.main-nav {
-  background-color: #fff;
-  padding: 0 40px;
-  height: 100px;
-  border-bottom: 1px solid #e6e6e6;
-}
-.main-nav-row {
-  width: 100%;
-}
-.logo {
-  font-size: 24px;
-  font-weight: bold;
-  color: #ff4400;
-  margin-right: 50px;
-}
-.search-box {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-.search-input {
-  width: 600px;
-  height: 40px;
-  border: 1px solid #e6e6e6;
-  border-radius: 4px 0 0 4px;
-}
-.search-btn {
-  width: 80px;
-  height: 40px;
-  background-color: #ff4400;
-  color: #fff;
-  border-radius: 0 4px 4px 0;
-}
-.nav-func {
-  margin-left: 50px;
-  font-size: 14px;
-}
-.nav-func .cart {
-  color: #ff4400;
+  height: 92vh; /* 确保根容器占满视口高度 */
 }
 
 /* 核心内容区 - 关键修改：移除内容区滚动，改为由根容器控制 */
 .content {
   padding: 10px 40px;
-  height: calc(
-    100vh - 185px - 120px
-  ); /* 计算内容区高度（视口高度 - 顶部padding - 底部footer高度） */
+  height: 100%; /* 计算内容区高度（视口高度 - 顶部padding - 底部footer高度） */
   overflow-y: auto; /* 保留内容区内部滚动（如果内容超出），但隐藏外部滚动条 */
   scrollbar-width: none; /* Firefox 隐藏滚动条 */
 }
@@ -336,42 +259,6 @@ onUnmounted(() => {
   width: 100%;
   cursor: pointer;
 }
-.goods-card {
-  width: 100%;
-  height: 320px;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.goods-img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-}
-.goods-info {
-  padding: 10px;
-}
-.goods-name {
-  font-size: 14px;
-  color: #333;
-  line-clamp: 2;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  margin-bottom: 5px;
-}
-.goods-price {
-  font-size: 16px;
-  font-weight: bold;
-  color: #ff4400;
-  margin-bottom: 5px;
-}
-.goods-sales {
-  font-size: 12px;
-  color: #999;
-}
 
 /* 响应式调整 */
 @media (max-width: 900px) {
@@ -401,7 +288,7 @@ onUnmounted(() => {
   padding: 40px;
   font-size: 12px;
   color: #666;
-  height: 120px; /* 固定footer高度，方便内容区计算 */
+  height: 14%; /* 固定footer高度，方便内容区计算 */
   box-sizing: border-box;
 }
 .footer-links {

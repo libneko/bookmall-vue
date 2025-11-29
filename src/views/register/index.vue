@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { LoginForm, RegisterForm } from '@/api/types'
+import type {  RegisterForm } from '@/api/types'
 import { ElMessage } from 'element-plus'
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormRules, FormInstance } from 'element-plus'
+import { registerApi } from '@/api/register'
 
 let registerForm = ref<RegisterForm>({ username: '', password: '', name: '' })
 
@@ -17,14 +18,24 @@ const passwordForm = reactive({
 })
 
 const register = async () => {
-  // 登录
+  // 注册
   console.log(registerForm.value)
-  // 提示信息
-  ElMessage.success('注册成功')
-  // 存储当前登录用户信息
 
-  // 跳转页面 - 首页
-  router.push('/login')
+  const result = await registerApi(registerForm.value)
+
+  if (result.code == 1) {
+    // 提示信息
+    ElMessage.success('注册成功')
+    // 存储当前登录用户信息
+
+    // 跳转页面 - 首页
+    router.push('/login')    
+  }
+  else {
+    ElMessage.success('传输注册数据失败')
+  }
+
+
 }
 
 // 自定义校验器：检查两次密码是否一致
