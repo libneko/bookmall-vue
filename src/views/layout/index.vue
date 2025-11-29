@@ -101,7 +101,7 @@ const logout = () => {
 }
 
 .main-content {
-  background-color: rgba(250, 204, 204, 0.4);
+  background-color: rgba(248, 228, 228, 0.2);
   margin-left: 13%;
   margin-top: 3.9%;
   padding: 0px;
@@ -121,6 +121,9 @@ const logout = () => {
   width: calc(100% - 13%);
   height: 8%;
   position: fixed; /* 固定在页面 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   top: 0; /* 顶部 */
   left: 0;
   z-index: 1000; /* 层级高一点 */
