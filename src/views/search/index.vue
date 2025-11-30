@@ -29,6 +29,16 @@ const select = ref('')
         </template>
       </el-input>
     </div>
+      <div class="result-list" v-if="isSearched">
+        <div 
+          class="book-card"
+          v-for="book in bookList" 
+          :key="book.id"
+        >
+          <img :src="book.image" />
+          <p>{{ book.name }}</p>
+        </div>
+      </div>
   </div>
 </template>
 
@@ -49,7 +59,7 @@ const select = ref('')
   justify-content: center;
 
   align-items: center;
-  background-image: url('../../assets/233.png');
+  background-image: url('https://neko-book.oss-cn-hangzhou.aliyuncs.com/search.jpg');
   background-repeat: no-repeat; /* 不重复 */
   background-position: center; /* 居中显示 */
   background-size: cover; /* ← 整图完整显示 */

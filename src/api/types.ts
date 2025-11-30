@@ -50,3 +50,15 @@ export interface Category {
 export interface Addshopping {
   book_id: number
 }
+
+export interface SendSearch{
+  total: number
+  records: Book
+}
+export interface ReceiveSearch{
+  page: number
+  page_size: number
+  name: string
+  category_id: number
+  status: number
+}

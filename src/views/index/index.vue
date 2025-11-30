@@ -2,18 +2,11 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getBooks, getCategories} from '@/api/home'
-import type { Book, Category } from '@/api/types'
+import type { Book, Category , BookStock } from '@/api/types'
 import BookCard from '@/component/book.vue'
 
 interface Banner {
   id: number
-  imgUrl: string
-}
-
-interface Goods {
-  id: number
-  name: string
-  price: number
   imgUrl: string
 }
 
@@ -32,7 +25,7 @@ const books = ref<Book[]>([])
 const banners = ref<Banner[]>([])
 
 // 商品数据 - 从 Book 列表生成
-const goodsList = ref<Goods[]>([])
+const goodsList = ref<Book[]>([])
 
 // 从后端加载数据（顺序调用），并随机选取 banner/goods
 const getRandomItems = <T,>(arr: T[], n: number): T[] => {
@@ -67,15 +60,19 @@ const loadData = async () => {
     id: book.id ?? index,
     name: book.name,
     price: book.price,
-    sales: generateRandomSales(),
-    imgUrl: book.image,
+    image: book.image,
+    author: book.author,
+    category_id: book.category_id,
+    description: book.description,
+    status: book.status,
+    book_stock: book.book_stock
   }))
   console.log(goodsList.value)
 }
 
 const router = useRouter()
 
-const openGoods = (g: Goods) => {
+const openGoods = (g: Book) => {
   router.push(`/introduction/${g.id}`)
 }
 

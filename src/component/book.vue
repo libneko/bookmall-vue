@@ -12,14 +12,14 @@ interface Books{
 let books = ref<Book>()
 
 defineProps<{
-  book:Books
+  book:Book
 }>()
 </script>
 
 <template>
   <el-card class="book-card">
     <el-image
-      :src="book.imgUrl"
+      :src="book.image"
       class="book-img"
       fit="contain"
     />

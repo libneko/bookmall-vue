@@ -57,37 +57,48 @@ const handleChange = (value: number | undefined) => {
         </div>
       </div>
       <div class="books-row2">
-        <div class="books-introduction">
-          <p>书籍详情</p>
+        <div class ='books-col1'>
+          <div class = 'books-col1-row'>
+            <div class="books-introduction">
+              <p>书籍详情</p>
+            </div>
+            <div class="books-title">
+              <h2>&nbsp;&nbsp;{{ book?.name }}</h2>
+            </div>
+            <div class="books-auth">
+              <p>作者:{{ book?.author }}</p>
+              <p>最后更新:</p>
+              <p>更新时间:</p>
+            </div>
+          </div>
+          <div class = 'books-col1-row2'>
+              
+            <div class="books-price">
+              <h3>单本价格(RMB):</h3>
+              <p>{{ book?.price }}</p>
+            </div>
+          
+          </div>
+
         </div>
-        <div class="books-title">
-          <h2>&nbsp;&nbsp;{{ book?.name }}</h2>
+        <div class ='books-col2'>
+          <div class="books-intro">
+            <h3>简介:</h3>
+            <p>{{ book?.description }}</p>
+          </div>
+          <div class="books-buy">
+            <el-input-number
+              v-model="num"
+              :min="1"
+              :max="book?.book_stock?.stock"
+              @change="handleChange"
+            />
+            <el-button type="primary" @click="addShopping(shopp)">加入购物车</el-button>
+          </div>
         </div>
-        <div class="books-auth">
-          <p>作者:{{ book?.author }}</p>
-          <p>最后更新:</p>
-          <p>更新时间:</p>
-        </div>
-        <div class="books-intro">
-          <h3>简介:</h3>
-          <p>{{ book?.description }}</p>
-        </div>
-        <div class="books-buy">
-          <el-button type="primary" @click="addShopping(shopp)">加入购物车</el-button>
-          &nbsp;&nbsp;&nbsp;<el-input-number
-            v-model="num"
-            :min="1"
-            :max="book?.book_stock?.stock"
-            @change="handleChange"
-          />
-        </div>
+
       </div>
-      <div class="books-row3">
-        <div class="books-price">
-          <h3>单本价格(RMB):</h3>
-          <p>{{ book?.price }}</p>
-        </div>
-      </div>
+
     </div>
   </div>
 </template>
@@ -111,7 +122,7 @@ const handleChange = (value: number | undefined) => {
   overflow: hidden;
   height: auto;
 
-  background-color: rgba(62, 60, 60, 0.2);
+  background-color: #F5F7FA;
   border: 2px solid #ccc; /* 淡灰色更柔和 */
   border-radius: 10px; /* 圆角 */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* 阴影 可选 */
@@ -122,6 +133,7 @@ const handleChange = (value: number | undefined) => {
   padding-left: 2%;
   padding-top: 2%;
   width: 30%;
+  
 }
 
 .books-row2 {
@@ -129,20 +141,23 @@ const handleChange = (value: number | undefined) => {
   padding-left: 5%;
   display: flex;
   flex-direction: column;
-  width: 40%;
+  width: 70%;
 }
 
-.books-row3 {
-  padding-top: 2%;
-  width: 30%;
+.books-col1{
   display: flex;
-  flex-direction: column;
-  align-items: center; /* 水平居中 */
+  flex-direction:row;
+  justify-content: space-between;
+  height: 30%;
 }
+
+
 
 .books-introduction {
   color: rgb(160, 160, 160);
   font-size: small;
+  display: flex;
+  flex-direction: column;
 }
 
 .books-title {
@@ -179,21 +194,25 @@ const handleChange = (value: number | undefined) => {
 }
 
 .books-buy {
-  padding-top: 20%;
+  padding-top: 18%;
   font-size: 150%;
-  width: 100%;
-
+  width: 70%;
+  padding-left:50%;
   height: 15%;
   font-weight: bold;
   display: flex;
   flex-direction: row;
-  align-items: center; /* 垂直居中 */
+  gap:5%;
+}
+
+.books-col1-row2{
+  padding-right: 5%;
 }
 
 .books-price p {
   width: 100%;
   border-radius: 30px;
-  color: rgb(255, 145, 0);
+  color: rgb(229, 94, 52);
   font-weight: bold; /* 粗体 */
   font-style: italic; /* 斜体 */
   font-size: 300%;
@@ -206,11 +225,23 @@ const handleChange = (value: number | undefined) => {
   display: block;
 }
 :deep(.el-button) {
+  
   width: 30%;
   height: 90%;
-  background-color: rgb(241, 187, 187);
+  background-color: rgb(229, 94, 52);
 }
 :deep(.el-input-number) {
   width: 30%;
+}
+
+:deep(.el-input-number__decrease ){
+  background-color: #D7D4D4;
+}
+:deep(.el-input-number__increase){
+  background-color: #D7D4D4;
+}
+
+:deep(.el-icon){
+  color: black;
 }
 </style>
