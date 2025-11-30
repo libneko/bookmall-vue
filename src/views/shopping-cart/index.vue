@@ -9,7 +9,8 @@ import {
   clearCartApi,
 } from '@/api/shopping-cart'
 import type { ApiResponse, ShoppingCartItem } from '@/api/types'
-
+import { bookApi } from '@/api/introduction'
+import BookCard from '@/component/book.vue'
 // 定义商品类型
 interface Product {
   id: number
@@ -54,7 +55,7 @@ const transformBackendItemToProduct = (backendItem: ShoppingCartItem, storeId: n
   // const unitPrice = backendItem.amount / backendItem.number
 
   return {
-    id: backendItem.id,
+    id: backendItem.book_id,
     storeId: storeId,
     name: backendItem.name,
     image: backendItem.image,
@@ -76,13 +77,19 @@ const fetchShoppingCartData = async () => {
 
     if (response.code === 1 && response.data && Array.isArray(response.data)) {
       // 清空并重新填充数据
+
       store.value.items = response.data.map((item: ShoppingCartItem) =>
         transformBackendItemToProduct(item, store.value.id),
       )
 
+      const stockPromises = store.value.items.map(async (item: Product) => {
+        const res = await bookApi(item.id) // 等待单个API请求完成
+        console.info('库存数据:', res)
+        item.stock = res.data.book_stock.stock // 更新库存
+      })
       // 更新选择状态
       updateStoreIndeterminate(store.value)
-      updateSelectAll()
+      // updateSelectAll()
 
       ElMessage.success(`成功加载 ${response.data.length} 件商品`)
     } else {
@@ -148,10 +155,10 @@ const updateStoreIndeterminate = (store: Store) => {
   store.indeterminate = selectedItems.length > 0 && selectedItems.length < store.items.length
 }
 
-// 方法 - 更新全选状态
-const updateSelectAll = () => {
-  // 全选状态由计算属性自动处理
-}
+// // 方法 - 更新全选状态
+// const updateSelectAll = () => {
+//   // 全选状态由计算属性自动处理
+// }
 
 // 方法 - 处理全选变化
 const handleSelectAllChange = (value: boolean) => {
@@ -170,13 +177,13 @@ const handleStoreSelectChange = (store: Store) => {
     item.selected = store.selected
   })
   updateStoreIndeterminate(store)
-  updateSelectAll()
+  // updateSelectAll()
 }
 
 // 方法 - 处理商品选择变化
 const handleItemSelectChange = (store: Store) => {
   updateStoreIndeterminate(store)
-  updateSelectAll()
+  // updateSelectAll()
 }
 
 // 方法 - 处理数量变化（调用API）
@@ -190,7 +197,7 @@ const handleQuantityChange = async (item: Product) => {
       number: item.quantity,
     })
 
-    if (response.code === 200) {
+    if (response.code === 1) {
       ElMessage.success(`已更新 ${item.name} 的数量`)
     } else {
       ElMessage.error(response.msg || '更新数量失败')
@@ -215,8 +222,9 @@ const removeItem = async (id: number) => {
 
     const response = await deleteCartItemApi(id)
 
-    if (response.code === 200) {
+    if (response.code === 1) {
       // 删除成功后重新获取数据
+      console.log('删除商品成功，刷新数据', response)
       await fetchShoppingCartData()
       ElMessage.success('商品删除成功')
     } else {
@@ -243,7 +251,7 @@ const clearCart = async () => {
 
     const response = await clearCartApi()
 
-    if (response.code === 200) {
+    if (response.code === 1) {
       store.value.items = []
       ElMessage.success('购物车已清空')
     } else {
@@ -332,7 +340,6 @@ onMounted(() => {
             @change="() => handleStoreSelectChange(store)"
           />
           <span class="store-name">{{ store.name }}</span>
-          <el-tag size="small" type="info">店铺</el-tag>
           <el-button link type="primary" size="small" class="store-action"> 联系客服 </el-button>
         </div>
       </div>
@@ -355,15 +362,17 @@ onMounted(() => {
             <!-- 商品信息 -->
             <el-col class="item-info" :span="10">
               <el-row>
-                <el-image :src="item.image" class="product-image" fit="contain">
-                  <template #error>
-                    <div class="image-error">
-                      <el-icon>
-                        <Picture />
-                      </el-icon>
-                    </div>
-                  </template>
-                </el-image>
+                <router-link :to="{ name: 'introduction', params: { id: item.id } }">
+                  <el-image :src="item.image" class="product-image" fit="contain">
+                    <template #error>
+                      <div class="image-error">
+                        <el-icon>
+                          <Picture />
+                        </el-icon>
+                      </div>
+                    </template>
+                  </el-image>
+                </router-link>
 
                 <div class="item-details">
                   <h4 class="product-name">{{ item.name }}</h4>
@@ -386,11 +395,11 @@ onMounted(() => {
             </el-col>
 
             <!-- 数量控制 -->
-            <el-col class="item-quantity" :span="3">
+            <el-col class="item-quantity" :span="3" style="margin-top: 20px">
               <el-input-number
                 v-model="item.quantity"
                 :min="1"
-                :max="item.stock"
+                :max="item.stock > 99 ? 99 : item.stock"
                 size="small"
                 controls-position="right"
                 @change="() => handleQuantityChange(item)"
@@ -420,41 +429,46 @@ onMounted(() => {
         </el-empty>
       </div>
     </el-card>
-
-    <!-- 底部悬浮结算栏 -->
-    <el-affix position="bottom" :offset="0" v-if="cartItems.length > 0" style="width: 100%">
-      <div class="footer-content">
-        <div class="footer-left">
-          <el-checkbox
-            v-model="selectAll"
-            :indeterminate="isIndeterminate"
-            @change="handleSelectAllChange"
-          >
-            全选
-          </el-checkbox>
-          <el-button link type="danger" @click="clearCart"> 清空购物车 </el-button>
-        </div>
-
-        <div class="footer-right">
-          <div class="price-line">
-            <span>已选 {{ selectedCount }} 件商品，</span>
-            <span class="total-label">合计：</span>
-            <span class="total-price">¥{{ totalPrice.toFixed(2) }}</span>
-          </div>
-
-          <el-button
-            type="warning"
-            size="large"
-            class="checkout-btn"
-            :disabled="selectedCount === 0"
-            @click="handleCheckout"
-          >
-            去结算 ({{ selectedCount }})
-          </el-button>
-        </div>
-      </div>
-    </el-affix>
   </div>
+
+  <!-- 底部悬浮结算栏 -->
+  <el-affix
+    position="bottom"
+    :offset="0"
+    v-if="cartItems.length > 0"
+    style="width: 80%; margin: 0 auto"
+  >
+    <div class="footer-content">
+      <div class="footer-left">
+        <el-checkbox
+          v-model="selectAll"
+          :indeterminate="isIndeterminate"
+          @change="handleSelectAllChange"
+        >
+          全选
+        </el-checkbox>
+        <el-button link type="danger" @click="clearCart"> 清空购物车 </el-button>
+      </div>
+
+      <div class="footer-right">
+        <div class="price-line">
+          <span>已选 {{ selectedCount }} 件商品，</span>
+          <span class="total-label">合计：</span>
+          <span class="total-price">¥{{ totalPrice.toFixed(2) }}</span>
+        </div>
+
+        <el-button
+          type="warning"
+          size="large"
+          class="checkout-btn"
+          :disabled="selectedCount === 0"
+          @click="handleCheckout"
+        >
+          去结算 ({{ selectedCount }})
+        </el-button>
+      </div>
+    </div>
+  </el-affix>
 </template>
 
 <style scoped>
