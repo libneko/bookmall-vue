@@ -1,10 +1,7 @@
-///user/shoppingCart/add
-//book_id
-
 import request from '@/utils/request'
-import type { UpdateCartForm, ShoppingCartItem, Addshopping, ApiResponse } from './types'
+import type { UpdateCartForm, ShoppingCartItem, BookData, ApiResponse } from './types'
 
-export const shop = (book_id: Addshopping): Promise<ApiResponse<Addshopping>> => {
+export const addShoppingCartApi = (book_id: BookData): Promise<ApiResponse<object>> => {
   return request.post('/user/shoppingCart/add', book_id)
 }
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
 import { getBooks, getCategories } from '@/api/home'
 import type { Book, Category } from '@/api/types'
 import BookCard from '@/component/book.vue'
@@ -19,40 +18,15 @@ const loadData = async () => {
   books.value = (await getBooks()).data
 
   banners.value = _.sampleSize(books.value, 3)
-  suggestBooks.value = _.sampleSize(books.value, 6)
+  suggestBooks.value = _.sampleSize(books.value, 20)
 }
 
 // Banner轮播逻辑
 const currentIndex = ref(0)
-const bannerCount = ref(banners.value.length)
-let intervalId: number | null | undefined = null
-
-const switchBanner = (index: number) => {
-  currentIndex.value = index
-}
-
-const prevBanner = () => {
-  currentIndex.value = (currentIndex.value - 1 + bannerCount.value) % bannerCount.value
-}
-
-const nextBanner = () => {
-  currentIndex.value = (currentIndex.value + 1) % bannerCount.value
-}
 
 // 自动轮播
 onMounted(() => {
   loadData()
-
-  intervalId = setInterval(() => {
-    nextBanner()
-  }, 3000)
-})
-
-// 组件卸载时清除定时器
-onUnmounted(() => {
-  if (intervalId) {
-    clearInterval(intervalId)
-  }
 })
 </script>
 
@@ -62,12 +36,7 @@ onUnmounted(() => {
     <el-main class="content">
       <!-- 顶部 Banner（放在最上面） -->
       <div class="banner-wrap">
-        <el-carousel
-          :current-index="currentIndex"
-          @change="switchBanner"
-          class="banner-carousel"
-          height="500px"
-        >
+        <el-carousel :current-index="currentIndex" class="banner-carousel" height="500px">
           <el-carousel-item v-for="(banner, index) in banners" :key="index">
             <el-image style="width: 100%; height: 100%" :src="banner.image" fit="contain" />
           </el-carousel-item>
@@ -87,23 +56,11 @@ onUnmounted(() => {
         </el-scrollbar>
       </div>
 
-      <div class="book-section">
-        <div class="book-title">猜你喜欢</div>
-
-        <el-row :gutter="20">
-          <el-col
-            v-for="book in suggestBooks"
-            :key="book.id"
-            :xs="24"
-            :sm="12"
-            :md="8"
-            style="padding: 10px"
-          >
-            <div style="cursor: pointer; height: 100%">
-              <BookCard :book="book" />
-            </div>
-          </el-col>
-        </el-row>
+      <div class="book-title">猜你喜欢</div>
+      <div class="book-grid">
+        <div class="book-item" v-for="book in suggestBooks" :key="book.id">
+          <BookCard :book="book" />
+        </div>
       </div>
     </el-main>
 
@@ -139,9 +96,15 @@ onUnmounted(() => {
 .banner-wrap {
   margin-bottom: 16px;
 }
-.banner-carousel {
-  width: 100%;
-  height: 40%;
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+  gap: 20px;
+}
+
+.book-item {
+  cursor: pointer;
 }
 
 /* 横向分类栏 */
@@ -152,14 +115,10 @@ onUnmounted(() => {
   padding: 12px 0;
 }
 
-/* 商品卡片区 */
-.book-section {
-  margin-top: 20px;
-}
-
 .book-title {
   font-size: 18px;
   font-weight: bold;
+  margin-top: 20px;
   margin-bottom: 15px;
 }
 

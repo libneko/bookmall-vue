@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ElMessage, type ImageProps } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { bookApi } from '@/api/introduction'
-import type { Addshopping, Book } from '@/api/types'
+import type { BookData, Book } from '@/api/types'
 import { ref, onMounted } from 'vue'
-import { shop } from '@/api/shopping-cart'
+import { addShoppingCartApi } from '@/api/shopping-cart'
 
 const props = defineProps<{ id: number }>()
 
 let book = ref<Book>()
 
-let shopp = ref<Addshopping>({
+let shopp = ref<BookData>({
   book_id: 0,
 })
 let book_id: number
@@ -24,10 +24,10 @@ onMounted(async () => {
   shopp.value.book_id = book_id
 })
 
-const addShopping = async (book_id: Addshopping) => {
+const addShopping = async (book_id: BookData) => {
   try {
     console.log(book_id)
-    const res = await shop(book_id)
+    const res = await addShoppingCartApi(book_id)
     console.log(res)
     // 成功提示
     if (res.code !== 0) {

@@ -47,7 +47,7 @@ export interface Category {
   status: number
 }
 
-export interface Addshopping {
+export interface BookData {
   book_id: number
 }
 
