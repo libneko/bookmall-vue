@@ -79,3 +79,8 @@ export interface UpdateCartForm {
   id: number
   number: number
 }
+
+//删除商品
+export interface ShoppingDeleteForm {
+  id: number
+}
