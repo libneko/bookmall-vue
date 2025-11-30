@@ -47,7 +47,7 @@ export interface Category {
   status: number
 }
 
-export interface Addshopping {
+export interface BookData {
   book_id: number
 }
 
@@ -55,10 +55,27 @@ export interface SendSearch{
   total: number
   records: Book
 }
-export interface ReceiveSearch{
+export interface ReceiveSearch {
   page: number
   page_size: number
   name: string
   category_id: number
   status: number
+}
+// 根据图片添加购物车相关接口
+export interface ShoppingCartItem {
+  id: number
+  name: string
+  user_id: number
+  book_id: number
+  number: number // 数量
+  amount: number // 金额
+  image: string
+  create_time: string
+}
+
+//更新购物车
+export interface UpdateCartForm {
+  id: number
+  number: number
 }

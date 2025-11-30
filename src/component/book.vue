@@ -1,31 +1,24 @@
 <script setup lang="ts">
-import type { Book, Category } from '@/api/types'
-import { ref, onMounted, onUnmounted } from 'vue'
-
-interface Books{
-  id: number
-  name: string
-  price: number
-  imgUrl: string
-}
-
-let books = ref<Book>()
+import type { Book } from '@/api/types'
+import { useRouter } from 'vue-router'
 
 defineProps<{
-  book:Book
+  book: Book
 }>()
+
+const router = useRouter()
+
+const openBook = (book: Book) => {
+  router.push({ name: 'introduction', params: { id: book.id } })
+}
 </script>
 
 <template>
-  <el-card class="book-card">
-    <el-image
-      :src="book.image"
-      class="book-img"
-      fit="contain"
-    />
+  <el-card class="book-card" @click="openBook(book)" shadow="hover">
+    <el-image :src="book.image" class="book-img" fit="contain" />
     <template #footer>
-        <div class="book-name">{{ book.name }}</div>
-        <div class="book-price">¥{{ book.price }}</div>
+      <div class="book-name">{{ book.name }}</div>
+      <div class="book-price">¥{{ book.price }}</div>
     </template>
   </el-card>
 </template>
@@ -35,7 +28,6 @@ defineProps<{
   width: 100%;
   height: 320px;
   border-radius: 8px;
-  /* overflow: hidden; */
   display: flex;
   flex-direction: column;
 }

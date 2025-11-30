@@ -1,40 +1,39 @@
 <script setup lang="ts">
-import { ElMessage, type ImageProps } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { bookApi } from '@/api/introduction'
-import type { Addshopping, Book } from '@/api/types'
+import type { BookData, Book } from '@/api/types'
 import { ref, onMounted } from 'vue'
-import { useRouter,useRoute } from 'vue-router'
-import { shop } from '@/api/shopping-cart'
+import { addShoppingCartApi } from '@/api/shopping-cart'
 
-const router = useRouter()
-const route = useRoute()   // ⭐ 获取路由参数
+const props = defineProps<{ id: number }>()
 
 let book = ref<Book>()
-let shopp = ref<Addshopping>({
+
+let shopp = ref<BookData>({
   book_id: 0,
 })
 let book_id: number
+
 const num = ref(1)
+
 onMounted(async () => {
-  const id = Number(route.params.id)
-  const res = await bookApi(id)
+  const res = await bookApi(props.id)
   console.log(res)
   book.value = res.data
   book_id = book.value.id
   shopp.value.book_id = book_id
 })
 
-const addShopping = async (book_id: Addshopping) => {
+const addShopping = async (book_id: BookData) => {
   try {
     console.log(book_id)
-    const res = await shop(book_id)
+    const res = await addShoppingCartApi(book_id)
     console.log(res)
     // 成功提示
-    if (res.code != 0) {
+    if (res.code !== 0) {
       console.log('加入成功:', res)
       ElMessage.success('已加入购物车')
-    }
-    else {
+    } else {
       ElMessage.error('加入失败')
     }
   } catch (err) {
@@ -53,7 +52,7 @@ const handleChange = (value: number | undefined) => {
     <div class="books">
       <div class="books-row1">
         <div class="books-pic">
-          <el-image style="width: 100%; height: 100%" :src="book?.image" fit="cover" />
+          <el-image style="width: 100%; height: 100%" :src="book?.image" fit="contain" />
         </div>
       </div>
       <div class="books-row2">

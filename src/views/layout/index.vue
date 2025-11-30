@@ -97,9 +97,6 @@ const logout = () => {
 </template>
 
 <style scoped>
-.common-layout {
-}
-
 .main-content {
   background-color: rgba(248, 228, 228, 0.2);
   margin-left: 13%;
