@@ -51,11 +51,11 @@ export interface BookData {
   book_id: number
 }
 
-export interface SendSearch{
-  total: number
-  records: Book
-}
 export interface ReceiveSearch {
+  total: number
+  records: Book[]
+}
+export interface SendSearch {
   page: number
   page_size: number
   name: string

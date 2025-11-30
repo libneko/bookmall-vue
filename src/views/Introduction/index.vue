@@ -56,8 +56,8 @@ const handleChange = (value: number | undefined) => {
         </div>
       </div>
       <div class="books-row2">
-        <div class ='books-col1'>
-          <div class = 'books-col1-row'>
+        <div class="books-col1">
+          <div class="books-col1-row">
             <div class="books-introduction">
               <p>书籍详情</p>
             </div>
@@ -70,17 +70,14 @@ const handleChange = (value: number | undefined) => {
               <p>更新时间:</p>
             </div>
           </div>
-          <div class = 'books-col1-row2'>
-              
+          <div class="books-col1-row2">
             <div class="books-price">
               <h3>单本价格(RMB):</h3>
               <p>{{ book?.price }}</p>
             </div>
-          
           </div>
-
         </div>
-        <div class ='books-col2'>
+        <div class="books-col2">
           <div class="books-intro">
             <h3>简介:</h3>
             <p>{{ book?.description }}</p>
@@ -95,9 +92,7 @@ const handleChange = (value: number | undefined) => {
             <el-button type="primary" @click="addShopping(shopp)">加入购物车</el-button>
           </div>
         </div>
-
       </div>
-
     </div>
   </div>
 </template>
@@ -121,7 +116,7 @@ const handleChange = (value: number | undefined) => {
   overflow: hidden;
   height: auto;
 
-  background-color: #F5F7FA;
+  background-color: #f5f7fa;
   border: 2px solid #ccc; /* 淡灰色更柔和 */
   border-radius: 10px; /* 圆角 */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* 阴影 可选 */
@@ -132,7 +127,6 @@ const handleChange = (value: number | undefined) => {
   padding-left: 2%;
   padding-top: 2%;
   width: 30%;
-  
 }
 
 .books-row2 {
@@ -143,14 +137,16 @@ const handleChange = (value: number | undefined) => {
   width: 70%;
 }
 
-.books-col1{
+.books-col1 {
   display: flex;
-  flex-direction:row;
+  flex-direction: row;
   justify-content: space-between;
   height: 30%;
 }
 
-
+.books-col2 {
+  padding-top: 3%;
+}
 
 .books-introduction {
   color: rgb(160, 160, 160);
@@ -196,15 +192,15 @@ const handleChange = (value: number | undefined) => {
   padding-top: 18%;
   font-size: 150%;
   width: 70%;
-  padding-left:50%;
+  padding-left: 50%;
   height: 15%;
   font-weight: bold;
   display: flex;
   flex-direction: row;
-  gap:5%;
+  gap: 5%;
 }
 
-.books-col1-row2{
+.books-col1-row2 {
   padding-right: 5%;
 }
 
@@ -224,7 +220,6 @@ const handleChange = (value: number | undefined) => {
   display: block;
 }
 :deep(.el-button) {
-  
   width: 30%;
   height: 90%;
   background-color: rgb(229, 94, 52);
@@ -233,14 +228,14 @@ const handleChange = (value: number | undefined) => {
   width: 30%;
 }
 
-:deep(.el-input-number__decrease ){
-  background-color: #D7D4D4;
+:deep(.el-input-number__decrease) {
+  background-color: #d7d4d4;
 }
-:deep(.el-input-number__increase){
-  background-color: #D7D4D4;
+:deep(.el-input-number__increase) {
+  background-color: #d7d4d4;
 }
 
-:deep(.el-icon){
+:deep(.el-icon) {
   color: black;
 }
 </style>
