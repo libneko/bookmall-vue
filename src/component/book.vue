@@ -1,20 +1,14 @@
 <script setup lang="ts">
 import type { Book } from '@/api/types'
-import { useRouter } from 'vue-router'
+import { openBook } from '@/api/meta'
 
 defineProps<{
   book: Book
 }>()
-
-const router = useRouter()
-
-const openBook = (book: Book) => {
-  router.push({ name: 'introduction', params: { id: book.id } })
-}
 </script>
 
 <template>
-  <el-card class="book-card" @click="openBook(book)" shadow="hover">
+  <el-card class="book-card" @click="openBook(book.id)" shadow="hover">
     <el-image :src="book.image" class="book-img" fit="contain" />
     <template #footer>
       <div class="book-name">{{ book.name }}</div>

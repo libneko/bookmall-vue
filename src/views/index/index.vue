@@ -4,6 +4,7 @@ import { getBooks, getCategories } from '@/api/home'
 import type { Book, Category } from '@/api/types'
 import BookCard from '@/component/book.vue'
 import _ from 'lodash'
+import { openBook } from '@/api/meta'
 
 // 分类数据
 const categories = ref<Category[]>([])
@@ -37,7 +38,11 @@ onMounted(() => {
       <!-- 顶部 Banner（放在最上面） -->
       <div class="banner-wrap">
         <el-carousel :current-index="currentIndex" class="banner-carousel" height="500px">
-          <el-carousel-item v-for="(banner, index) in banners" :key="index">
+          <el-carousel-item
+            v-for="(banner, index) in banners"
+            :key="index"
+            @click="openBook(banner.id)"
+          >
             <el-image style="width: 100%; height: 100%" :src="banner.image" fit="contain" />
           </el-carousel-item>
         </el-carousel>
