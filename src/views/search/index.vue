@@ -2,7 +2,8 @@
 import { onMounted, ref, watch } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { searchApi } from '@/api/search'
-import type { Book, SendSearch } from '@/api/types'
+import { getCategories } from '@/api/home'
+import type { Book, Category, SendSearch } from '@/api/types'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
@@ -12,11 +13,12 @@ const router = useRouter()
 
 const input3 = ref('')
 
-const select = ref<number>(1)
-
-const hasSearched = ref(false) 
+const select = ref(1)
+const isFirstLoad = ref(true)
+const success_search = ref(false)
 
 let bookList = ref<Book[]>([])
+const categories = ref<Category[]>([])
 
 const isSearched = ref(false) // 是否已执行搜索
 
@@ -36,7 +38,10 @@ const searchBooks = async () => {
 watch(
   () => route.query,
   async () => {
-    const manualSearch= true
+    if (isFirstLoad.value) {
+      isFirstLoad.value = false
+      return // <-- 直接退出，不搜索
+    }
 
     const res = await searchApi({
       page: Number(route.query.page ?? 1),
@@ -46,22 +51,27 @@ watch(
       status: Number(route.query.status ?? 1),
     })
 
-    if (res.code === 1) {
-      if (manualSearch) isSearched.value = true
+    if (res.code === 1 && res.data.records.length > 0) {
+      isSearched.value = true
       bookList.value = res.data.records
-      ElMessage.success("搜索成功")
-    }
-    else {
-      ElMessage.error("未找到书籍")
+      ElMessage.success('搜索成功')
+    } else {
+      ElMessage.error('未找到书籍')
     }
     console.log(res.data)
-    isSearched.value = !!(route.query.name || route.query.categoryId)
+
     console.log(bookList.value)
   },
   { immediate: true },
 ) // 初次加载也执行
 
-
+onMounted(async () => {
+  categories.value = (await getCategories()).data
+  const id = Number(route.query.category_id)
+  if (!isNaN(id)) {
+    select.value = id // ⭐ 自动更新下拉框
+  }
+})
 </script>
 
 <template>
@@ -75,9 +85,7 @@ watch(
       >
         <template #prefix>
           <el-select v-model="select" placeholder="Select" style="width: 115px">
-            <el-option label="Restaurant" :value="1" />
-            <el-option label="Order No." :value="2" />
-            <el-option label="Tel" :value="3" />
+            <el-option v-for="category in categories" :label="category.name" :value="category.id" />
           </el-select>
         </template>
         <template #suffix>

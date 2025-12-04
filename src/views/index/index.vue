@@ -4,8 +4,10 @@ import { getBooks, getCategories } from '@/api/home'
 import type { Book, Category } from '@/api/types'
 import BookCard from '@/component/book.vue'
 import _ from 'lodash'
+import { useRouter } from 'vue-router'
 
 // 分类数据
+const router = useRouter()
 const categories = ref<Category[]>([])
 const books = ref<Book[]>([])
 // Banner 图书
@@ -19,6 +21,13 @@ const loadData = async () => {
 
   banners.value = _.sampleSize(books.value, 3)
   suggestBooks.value = _.sampleSize(books.value, 20)
+}
+
+const searchCategory = (id: number) => {
+  router.push({
+    path: '/search',
+    query: { categoryId: id },
+  })
 }
 
 // Banner轮播逻辑
@@ -49,7 +58,14 @@ onMounted(() => {
 
         <el-scrollbar wrap-style="overflow-x: auto; white-space: nowrap;">
           <el-space size="10">
-            <el-button v-for="category in categories" :key="category.id" type="default" plain round>
+            <el-button
+              v-for="category in categories"
+              :key="category.id"
+              @click="searchCategory(category.id)"
+              type="default"
+              plain
+              round
+            >
               {{ category.name }}
             </el-button>
           </el-space>
@@ -94,6 +110,7 @@ onMounted(() => {
 
 /* Banner样式 */
 .banner-wrap {
+  background-color: #f5f7fa;
   margin-bottom: 16px;
 }
 

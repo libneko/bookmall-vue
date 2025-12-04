@@ -105,7 +105,7 @@ const handleChange = (value: number | undefined) => {
   padding: 50px;
   padding-left: 100px;
 
-  height: 81vh;
+  height: 90vh;
   border-radius: 20px; /* 可改大或小，如 20px、999px等 */
 }
 
@@ -145,7 +145,7 @@ const handleChange = (value: number | undefined) => {
 }
 
 .books-col2 {
-  padding-top: 3%;
+  margin-top: 5%;
 }
 
 .books-introduction {
@@ -189,7 +189,8 @@ const handleChange = (value: number | undefined) => {
 }
 
 .books-buy {
-  padding-top: 18%;
+  margin-top: 18%;
+  padding-bottom: 5%;
   font-size: 150%;
   width: 70%;
   padding-left: 50%;

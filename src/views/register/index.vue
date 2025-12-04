@@ -6,11 +6,17 @@ import { useRouter } from 'vue-router'
 import type { FormRules, FormInstance } from 'element-plus'
 import { registerApi } from '@/api/register'
 
-let registerForm = ref<RegisterForm>({ username: '', password: '', name: '' })
+const registerForm = ref<RegisterForm>({
+  email: '',
+  password: '',
+  name: '',
+})
 
 const router = useRouter()
 
 const formRef = ref<FormInstance>()
+
+const select_Sex = ref('')
 
 const passwordForm = reactive({
   password: '',
@@ -23,7 +29,7 @@ const register = async () => {
 
   const result = await registerApi(registerForm.value)
 
-  if (result.code == 1) {
+  if (result.code === 1) {
     // 提示信息
     ElMessage.success('注册成功')
     // 存储当前登录用户信息
@@ -45,6 +51,8 @@ const validateConfirmPassword = (rule: any, value: string, callback: any) => {
     ElMessage.error('密码长度不能超过20位')
   } else if (value !== passwordForm.password) {
     ElMessage.error('两次输入的密码不一致')
+  } else {
+    callback()
   }
 }
 
@@ -52,6 +60,7 @@ const submit = () => {
   formRef.value?.validate((valid) => {
     if (valid) {
       console.log('校验通过，可以提交')
+      console.log(registerForm.value.email)
       registerForm.value.password = passwordForm.password
       register()
     }
@@ -82,8 +91,12 @@ const login = () => {
       <div class="login-form">
         <el-form :model="passwordForm" :rules="rules" ref="formRef" label-width="80px">
           <p class="title">加入大家庭</p>
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="registerForm.username" placeholder="起个名吧~"></el-input>
+          <el-form-item label="注册邮箱" prop="email">
+            <el-input v-model="registerForm.email" placeholder="邮箱登录用喵"></el-input>
+          </el-form-item>
+
+          <el-form-item label="名称" prop="name">
+            <el-input v-model="registerForm.name" placeholder="起个名喵"></el-input>
           </el-form-item>
 
           <el-form-item label="密码" prop="password">
@@ -143,9 +156,9 @@ const login = () => {
 }
 
 .login-form {
-  padding: 50px;
+  padding: 40px;
   margin: 0 auto;
-
+  width: 30%;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);

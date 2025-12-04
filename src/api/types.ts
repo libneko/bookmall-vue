@@ -5,21 +5,30 @@ export interface ApiResponse<T = any> {
 }
 
 export interface LoginForm {
-  username: string
+  email: string
   password: string
+}
+
+export interface ReceiveCodeflag {
+  data: boolean
+}
+
+export interface CodeLogin {
+  email: string
+  code: string
 }
 
 export interface LoginToken {
   id: number
   username: string
-  name: string
+  email: string
   token: string
 }
 
 export interface RegisterForm {
-  username: string
-  password: string
   name: string
+  password: string
+  email: string
 }
 
 export interface BookStock {
@@ -84,3 +93,15 @@ export interface UpdateCartForm {
 export interface ShoppingDeleteForm {
   id: number
 }
+
+export interface SendPersonId {
+  user_id: number
+}
+
+export interface ReceivePerson {
+  user_id: string
+  name: string
+  email: string
+}
+
+export interface SendCode {}

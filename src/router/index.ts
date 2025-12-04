@@ -7,6 +7,7 @@ import RegisterView from '@/views/register/index.vue'
 import ShoppingCartView from '@/views/shopping-cart/index.vue'
 import SearchView from '@/views/search/index.vue'
 import IntroductionView from '@/views/Introduction/index.vue'
+import PersonalView from '@/views/personal-information/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,7 +17,11 @@ const router = createRouter({
       name: 'home',
       component: LayoutView,
       children: [
-        { path: '/index', name: 'index', component: IndexView },
+        {
+          path: '/index',
+          name: 'index',
+          component: IndexView,
+        },
         {
           path: '/shopping-cart',
           name: 'shopping-cart',
@@ -35,6 +40,11 @@ const router = createRouter({
           component: IntroductionView,
           meta: { title: '书本详情' },
           props: true,
+        },
+        {
+          path: '/personal-information',
+          name: 'personal-information',
+          component: PersonalView,
         },
       ],
     },
