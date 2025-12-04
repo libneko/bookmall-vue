@@ -1,40 +1,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Picture } from '@element-plus/icons-vue'
 import {
   getShoppingCartApi,
   updateCartItemApi,
   deleteCartItemApi,
   clearCartApi,
 } from '@/api/shopping-cart'
-import type { ApiResponse, ShoppingCartItem } from '@/api/types'
+import type { ApiResponse, Product, ShoppingCartItem, Store } from '@/api/types'
 import { bookApi } from '@/api/introduction'
-import BookCard from '@/component/book.vue'
-// 定义商品类型
-interface Product {
-  id: number
-  storeId: number
-  name: string
-  image: string
-  price: number
-  quantity: number
-  stock: number
-  selected: boolean
-  specifications: string[]
-  freeShipping: boolean
-  guarantee: boolean
-}
-
-// 定义店铺类型
-interface Store {
-  id: number
-  name: string
-  selected: boolean
-  indeterminate: boolean
-  promotion: string
-  items: Product[]
-}
+import { openBook } from '@/api/meta'
 
 // 加载状态
 const loading = ref(false)
@@ -45,29 +20,8 @@ const store = ref<Store>({
   name: '小书架专卖店',
   selected: false,
   indeterminate: false,
-  promotion: '满50元包邮',
   items: [],
 })
-
-// 数据转换函数：将后端ShoppingCartItem转换为前端Product
-const transformBackendItemToProduct = (backendItem: ShoppingCartItem, storeId: number): Product => {
-  // // 计算单价：总金额 / 数量
-  // const unitPrice = backendItem.amount / backendItem.number
-
-  return {
-    id: backendItem.book_id,
-    storeId: storeId,
-    name: backendItem.name,
-    image: backendItem.image,
-    price: backendItem.amount, // 单价
-    quantity: backendItem.number, // 对应后端的number字段
-    stock: 100, // 默认库存，实际应从商品接口获取
-    selected: true, // 默认选中
-    specifications: ['默认规格'], // 需要从商品详情获取
-    freeShipping: backendItem.amount > 10, // 单价大于10元免运费
-    guarantee: true, // 默认有保障
-  }
-}
 
 // 获取购物车数据 - 增强错误处理
 const fetchShoppingCartData = async () => {
@@ -78,18 +32,26 @@ const fetchShoppingCartData = async () => {
     if (response.code === 1 && response.data && Array.isArray(response.data)) {
       // 清空并重新填充数据
 
-      store.value.items = response.data.map((item: ShoppingCartItem) =>
-        transformBackendItemToProduct(item, store.value.id),
-      )
+      const items = response.data
 
-      const stockPromises = store.value.items.map(async (item: Product) => {
-        const res = await bookApi(item.id) // 等待单个API请求完成
-        console.info('库存数据:', res)
-        item.stock = res.data.book_stock.stock // 更新库存
+      // 并行请求每个 book_id 对应的图书信息
+      const bookPromises = items.map((item) => bookApi(item.book_id))
+      const books = await Promise.all(bookPromises)
+      // 合并后端购物车项和图书详情，生成Product数组
+      store.value.items = items.map((cartItem, idx) => {
+        const bookDetail = books[idx]!.data
+        console.log('书籍详情:', bookDetail)
+        return {
+          ...bookDetail,
+          quantity: cartItem.number,
+          selected: true,
+          specifications: ['默认规格'],
+          freeShipping: cartItem.amount > 10,
+          guarantee: true,
+          stock: bookDetail?.book_stock?.stock ?? 100,
+        }
       })
-      // 更新选择状态
       updateStoreIndeterminate(store.value)
-      // updateSelectAll()
 
       ElMessage.success(`成功加载 ${response.data.length} 件商品`)
     } else {
@@ -155,11 +117,6 @@ const updateStoreIndeterminate = (store: Store) => {
   store.indeterminate = selectedItems.length > 0 && selectedItems.length < store.items.length
 }
 
-// // 方法 - 更新全选状态
-// const updateSelectAll = () => {
-//   // 全选状态由计算属性自动处理
-// }
-
 // 方法 - 处理全选变化
 const handleSelectAllChange = (value: boolean) => {
   if (!store.value) return
@@ -193,7 +150,7 @@ const handleQuantityChange = async (item: Product) => {
 
   try {
     const response = await updateCartItemApi({
-      id: item.id,
+      book_id: item.id,
       number: item.quantity,
     })
 
@@ -269,13 +226,10 @@ const handleCheckout = () => {
     return
   }
 
-  const selectedStores = store.value.selected ? [store.value] : []
   const totalAmount = totalPrice.value
 
   ElMessageBox.confirm(
-    `确认结算 ${selectedCount.value} 件商品（${
-      selectedStores.length
-    } 家店铺），总金额：¥${totalAmount.toFixed(2)}`,
+    `确认结算 ${selectedCount.value} 件商品，总金额：¥${totalAmount.toFixed(2)}`,
     '确认结算',
     {
       confirmButtonText: '去支付',
@@ -362,17 +316,13 @@ onMounted(() => {
             <!-- 商品信息 -->
             <el-col class="item-info" :span="10">
               <el-row>
-                <router-link :to="{ name: 'introduction', params: { id: item.id } }">
-                  <el-image :src="item.image" class="product-image" fit="contain">
-                    <template #error>
-                      <div class="image-error">
-                        <el-icon>
-                          <Picture />
-                        </el-icon>
-                      </div>
-                    </template>
-                  </el-image>
-                </router-link>
+                <el-image
+                  :src="item.image"
+                  class="product-image"
+                  fit="contain"
+                  @click="openBook(item.id)"
+                  style="cursor: pointer"
+                />
 
                 <div class="item-details">
                   <h4 class="product-name">{{ item.name }}</h4>
@@ -591,16 +541,6 @@ onMounted(() => {
   border: 1px solid #f0f0f0;
 }
 
-.image-error {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f5f5f5;
-  color: #999;
-}
-
 .item-details {
   flex: 1;
 }
@@ -735,68 +675,5 @@ onMounted(() => {
   min-width: 120px;
   height: 40px;
   font-size: 16px;
-}
-
-.recommendations {
-  margin-top: 40px;
-}
-
-.recommendations h3 {
-  margin-bottom: 20px;
-  color: #333;
-  font-size: 18px;
-}
-
-.rec-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.rec-item {
-  text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.rec-item:hover {
-  transform: translateY(-5px);
-}
-
-.rec-image {
-  width: 100%;
-  height: 120px;
-  border-radius: 4px;
-}
-
-.rec-info {
-  padding: 15px;
-}
-
-.rec-name {
-  font-size: 14px;
-  margin-bottom: 10px;
-  height: 40px;
-  overflow: hidden;
-  /* 修复CSS兼容性警告 */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-clamp: 2; /* 添加标准属性 */
-  display: -moz-box;
-  -moz-box-orient: vertical;
-  -moz-line-clamp: 2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.rec-price {
-  font-size: 16px;
-  color: #ff5000;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.add-btn {
-  width: 100%;
 }
 </style>

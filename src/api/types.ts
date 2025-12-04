@@ -64,6 +64,7 @@ export interface ReceiveSearch {
   total: number
   records: Book[]
 }
+
 export interface SendSearch {
   page: number
   page_size: number
@@ -71,6 +72,7 @@ export interface SendSearch {
   category_id: number
   status: number
 }
+
 // 根据图片添加购物车相关接口
 export interface ShoppingCartItem {
   id: number
@@ -85,7 +87,7 @@ export interface ShoppingCartItem {
 
 //更新购物车
 export interface UpdateCartForm {
-  id: number
+  book_id: number
   number: number
 }
 
@@ -105,3 +107,20 @@ export interface ReceivePerson {
 }
 
 export interface SendCode {}
+export interface Product extends Book {
+  quantity: number
+  selected: boolean
+  specifications: string[]
+  freeShipping: boolean
+  guarantee: boolean
+  stock: number
+}
+
+// 定义店铺类型
+export interface Store {
+  id: number
+  name: string
+  selected: boolean
+  indeterminate: boolean
+  items: Product[]
+}
