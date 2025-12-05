@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 
 // 当前登录的员工
 const login_name = ref('')
+const login_id = ref(1)
 const router = useRouter()
 
 // 跳转到购物车页面
@@ -16,6 +17,7 @@ onMounted(() => {
   const login_user = JSON.parse(localStorage.getItem('login_user')!)
   if (login_user && login_user.name) {
     login_name.value = login_user.name
+    login_id.value = login_user.id
   }
 })
 
@@ -36,6 +38,15 @@ const logout = () => {
     .catch(() => {
       ElMessage.info('您已取消退出')
     })
+}
+
+const information = () => {
+  router.push({
+    path: '/personal-information',
+    query: {
+      id: login_id.value,
+    },
+  })
 }
 </script>
 
@@ -79,7 +90,7 @@ const logout = () => {
           <span class="left_title">{{ router.currentRoute.value.meta.title }}</span>
 
           <span class="right_tool">
-            <a href="">
+            <a href="" @click="information">
               <el-icon><EditPen /></el-icon> 个人信息 &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
             </a>
             <a href="javascript:void(0);" @click="logout">

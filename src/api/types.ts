@@ -1,25 +1,34 @@
 export interface ApiResponse<T = any> {
   code: number
-  msg: string
+  message: string
   data: T
 }
 
 export interface LoginForm {
-  username: string
+  email: string
   password: string
+}
+
+export interface ReceiveCodeflag {
+  data: boolean
+}
+
+export interface CodeLogin {
+  email: string
+  code: string
 }
 
 export interface LoginToken {
   id: number
   username: string
-  name: string
+  email: string
   token: string
 }
 
 export interface RegisterForm {
-  username: string
-  password: string
   name: string
+  password: string
+  email: string
 }
 
 export interface BookStock {
@@ -51,17 +60,19 @@ export interface BookData {
   book_id: number
 }
 
-export interface SendSearch{
-  total: number
-  records: Book
-}
 export interface ReceiveSearch {
+  total: number
+  records: Book[]
+}
+
+export interface SendSearch {
   page: number
   page_size: number
   name: string
   category_id: number
   status: number
 }
+
 // 根据图片添加购物车相关接口
 export interface ShoppingCartItem {
   id: number
@@ -76,6 +87,40 @@ export interface ShoppingCartItem {
 
 //更新购物车
 export interface UpdateCartForm {
-  id: number
+  book_id: number
   number: number
+}
+
+//删除商品
+export interface ShoppingDeleteForm {
+  id: number
+}
+
+export interface SendPersonId {
+  user_id: number
+}
+
+export interface ReceivePerson {
+  user_id: string
+  name: string
+  email: string
+}
+
+export interface SendCode {}
+export interface Product extends Book {
+  quantity: number
+  selected: boolean
+  specifications: string[]
+  freeShipping: boolean
+  guarantee: boolean
+  stock: number
+}
+
+// 定义店铺类型
+export interface Store {
+  id: number
+  name: string
+  selected: boolean
+  indeterminate: boolean
+  items: Product[]
 }

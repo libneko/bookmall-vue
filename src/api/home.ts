@@ -7,6 +7,6 @@ export const getCategories = (): Promise<ApiResponse<Category[]>> => {
 }
 
 // 获取 book
-export const getBooks = (): Promise<ApiResponse<Book[]>> => {
-  return request.get('/user/book/list')
+export const getRandomBooks = (number: number): Promise<ApiResponse<Book[]>> => {
+  return request.get(`/user/book/random?number=${number}`)
 }

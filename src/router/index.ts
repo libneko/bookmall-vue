@@ -16,7 +16,11 @@ const router = createRouter({
       name: 'home',
       component: LayoutView,
       children: [
-        { path: '/index', name: 'index', component: IndexView },
+        {
+          path: '/index',
+          name: 'index',
+          component: IndexView,
+        },
         {
           path: '/shopping-cart',
           name: 'shopping-cart',

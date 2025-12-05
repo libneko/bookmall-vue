@@ -1,40 +1,145 @@
 <script setup lang="ts">
-import { loginApi } from '@/api/login'
-import type { LoginForm } from '@/api/types'
+import { codeLoginApi, loginApi, sendCodeApi, sendEmailApi } from '@/api/login'
+import { isValidEmail } from '@/api/meta'
+import type { ApiResponse, LoginToken } from '@/api/types'
 import { ElMessage } from 'element-plus'
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-let loginForm = ref<LoginForm>({ username: '', password: '' })
 const router = useRouter()
+const activeTab = ref<'code' | 'password'>('code')
+const captchaButton = ref<HTMLElement | null>(null)
+const captcha = ref<any>(null)
 
-// 登录
-const login = async () => {
-  // 登录
-  console.log(loginForm.value)
-  const result = await loginApi(loginForm.value)
-  console.log(result.code)
-  if (result.code === 1) {
-    // 提示信息
-    ElMessage.success('登录成功')
-    // 存储当前登录用户信息
-    localStorage.setItem('login_user', JSON.stringify(result.data))
-    // 跳转页面 - 首页
-    router.push('index')
+const codeForm = reactive({
+  email: '',
+  code: '',
+})
+
+const pwdForm = reactive({
+  email: '',
+  password: '',
+})
+
+const getInstance = (instance: any) => {
+  console.log(instance)
+  captcha.value = instance
+}
+
+const captchaVerifyCallback = async (captchaVerifyParam: any) => {
+  const res = await sendCodeApi(captchaVerifyParam)
+  if (res.code === 1) {
+    await sendEmailApi(codeForm.email.trim())
+    ElMessage.success('校验成功，已发送邮箱验证')
+    startCountdown(60)
   } else {
-    ElMessage.error(result.msg)
+    ElMessage.error('校验失败，重新校验')
+  }
+  return {
+    captchaResult: true,
+    bizResult: true,
   }
 }
 
-// 注册
+// 验证码倒计时
+const countdown = ref(0)
+let timer: number | undefined
+
+const startCountdown = (sec: number) => {
+  countdown.value = sec
+  if (timer) window.clearInterval(timer)
+  timer = window.setInterval(() => {
+    if (countdown.value <= 1) {
+      window.clearInterval(timer)
+      timer = undefined
+      countdown.value = 0
+    } else {
+      countdown.value--
+    }
+  }, 1000)
+}
+
+const sendCode = async () => {
+  const email = codeForm.email.trim()
+  if (!isValidEmail(email)) {
+    ElMessage.warning('请输入正确的邮箱地址')
+    return
+  }
+  captchaButton.value?.click()
+}
+
+const login = async () => {
+  let result: ApiResponse<LoginToken>
+  let email = activeTab.value === 'code' ? codeForm.email.trim() : pwdForm.email.trim()
+  if (!isValidEmail(email)) {
+    ElMessage.warning('请输入正确的邮箱')
+    return
+  }
+  if (activeTab.value === 'code') {
+    if (!codeForm.code.trim()) {
+      ElMessage.warning('请输入验证码')
+      return
+    }
+
+    result = await codeLoginApi({
+      email: codeForm.email,
+      code: codeForm.code,
+    })
+  } else {
+    if (!pwdForm.password) {
+      ElMessage.warning('请输入密码')
+      return
+    }
+
+    result = await loginApi({
+      email: pwdForm.email,
+      password: pwdForm.password,
+    })
+  }
+  if (result.code === 1) {
+    ElMessage.success('登录成功')
+    localStorage.setItem('login_user', JSON.stringify(result.data))
+    router.push('/index')
+  } else {
+    ElMessage.error(result.message)
+  }
+}
+
+const forgot = async () => {
+  ElMessage.success('功能未实现喵')
+}
+
 const register = () => {
   router.push('/register')
 }
 
-// 重置
-const clear = () => {
-  loginForm.value = { username: '', password: '' }
-}
+onMounted(async () => {
+  captchaButton.value = document.getElementById('captcha-button')
+
+  const script = document.createElement('script')
+  script.src = 'https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js'
+  script.async = true
+  script.onload = () => {
+    ;(window as any).initAliyunCaptcha({
+      SceneId: import.meta.env.VITE_ALIYUN_CAPTCHA_SCENE_ID,
+      prefix: import.meta.env.VITE_ALIYUN_CAPTCHA_PREFIX,
+      mode: 'popup',
+      button: '#captcha-button',
+      captchaVerifyCallback: captchaVerifyCallback,
+      getInstance: getInstance,
+      language: 'cn',
+    })
+  }
+
+  document.getElementsByTagName('head')[0]?.appendChild(script)
+})
+
+onBeforeUnmount(() => {
+  captchaButton.value = null
+
+  document.getElementById('aliyunCaptcha-mask')?.remove()
+  document.getElementById('aliyunCaptcha-window-popup')?.remove()
+})
 </script>
 
 <template>
@@ -49,30 +154,52 @@ const clear = () => {
       </div>
 
       <div class="login-form">
-        <el-form label-width="80px">
-          <p class="title">欢迎回来</p>
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="loginForm.username" placeholder="请输入用户名"></el-input>
-          </el-form-item>
+        <el-tabs v-model="activeTab" class="login-tabs" stretch="false">
+          <el-tab-pane label="验证码登录" name="code">
+            <el-form>
+              <p class="title">欢迎回来</p>
 
-          <el-form-item label="密码" prop="password">
-            <el-input
-              type="password"
-              v-model="loginForm.password"
-              placeholder="请输入密码"
-              show-password
-            ></el-input>
-          </el-form-item>
+              <el-form-item>
+                <el-input v-model="codeForm.email" placeholder="请输入邮箱" maxlength="20" />
+              </el-form-item>
 
-          <el-form-item>
-            <el-button class="button" type="primary" @click="login">登 录</el-button>
-          </el-form-item>
-        </el-form>
-        <div class="auth-hints">
-          <span>没有账号喵？</span>
-          <a href="#" class="register" @click="register">注册</a>
-          <span class="sep">|</span>
-          <a href="#">找回密码</a>
+              <el-form-item>
+                <el-input v-model="codeForm.code" placeholder="请输入验证码" maxlength="6">
+                  <template #append>
+                    <el-button id="captcha-button" :disabled="countdown > 0" @click="sendCode">
+                      {{ countdown > 0 ? countdown + '秒后可再次获取' : '获取验证码' }}
+                    </el-button>
+                  </template>
+                </el-input>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <el-tab-pane label="密码登录" name="password">
+            <el-form>
+              <p class="title">欢迎回来</p>
+
+              <el-form-item>
+                <el-input v-model="pwdForm.email" placeholder="请输入邮箱" maxlength="20" />
+              </el-form-item>
+
+              <el-form-item>
+                <el-input
+                  v-model="pwdForm.password"
+                  type="password"
+                  placeholder="请输入密码"
+                  show-password
+                />
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+        </el-tabs>
+
+        <el-button class="button" type="primary" @click="login">登 录</el-button>
+
+        <div class="auth-hints" v-if="activeTab === 'password'">
+          <a href="#" class="left" @click="forgot">忘记密码</a>
+          <a href="#" class="right register" @click="register">立即注册</a>
         </div>
       </div>
     </div>
@@ -103,15 +230,16 @@ const clear = () => {
 }
 
 .login-form {
-  padding: 50px;
+  padding: 40px;
   margin: 0 auto;
-
+  width: 30%;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   background-color: rgba(255, 255, 255, 0.8);
   margin-left: -50px;
 }
+
 :deep(.el-input__suffix) {
   position: absolute;
   right: 10px;
@@ -124,6 +252,19 @@ const clear = () => {
   padding-right: 40px !important;
 }
 
+/* 使 el-tabs 标签居中 */
+.login-tabs :deep(.el-tabs__nav-wrap) {
+  display: flex;
+  justify-content: center;
+}
+.login-tabs :deep(.el-tabs__nav-scroll) {
+  display: inline-block;
+}
+.login-tabs :deep(.el-tabs__nav) {
+  float: none !important;
+  display: inline-flex;
+}
+
 .title {
   font-size: 30px;
   font-family: '楷体';
@@ -134,19 +275,19 @@ const clear = () => {
 
 .button {
   margin-top: 30px;
-  width: 60%;
+  width: 100%;
 }
 
 .auth-hints {
-  text-align: center;
-  margin-top: 9%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
   font-size: 14px;
-  color: rgba(148, 75, 75, 0.8);
 }
 
 .auth-hints a {
+  color: var(--el-color-primary);
   cursor: pointer;
-  color: rgba(148, 75, 75, 0.8);
-  margin: 0 6px;
+  text-decoration: none;
 }
 </style>

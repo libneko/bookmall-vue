@@ -1,5 +1,11 @@
 import request from '@/utils/request'
-import type { UpdateCartForm, ShoppingCartItem, BookData, ApiResponse } from './types'
+import type {
+  ShoppingDeleteForm,
+  UpdateCartForm,
+  ShoppingCartItem,
+  BookData,
+  ApiResponse,
+} from './types'
 
 export const addShoppingCartApi = (book_id: BookData): Promise<ApiResponse<object>> => {
   return request.post('/user/shoppingCart/add', book_id)
@@ -12,12 +18,12 @@ export const getShoppingCartApi = (): Promise<ApiResponse<ShoppingCartItem[]>> =
 
 // 更新购物车商品数量
 export const updateCartItemApi = (data: UpdateCartForm): Promise<ApiResponse<any>> => {
-  return request.put('/cart/update', data)
+  return request.put('/user/shoppingCart/update', data)
 }
 
 // 删除购物车商品
 export const deleteCartItemApi = (id: number): Promise<ApiResponse<any>> => {
-  return request.delete(`/cart/delete/${id}`)
+  return request.delete(`/user/shoppingCart/` + id)
 }
 
 // 清空购物车
