@@ -1,30 +1,43 @@
 <script setup lang="ts">
-import { loginApi, codeloginApi, sendcodeApi, sendemailApi } from '@/api/login'
-import type { CodeLogin, LoginForm } from '@/api/types'
+import { codeLoginApi, loginApi, sendCodeApi, sendEmailApi } from '@/api/login'
+import { isValidEmail } from '@/api/meta'
+import type { ApiResponse, LoginToken } from '@/api/types'
 import { ElMessage } from 'element-plus'
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
+import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-
 const activeTab = ref<'code' | 'password'>('code')
-const emailReg = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
-const captcha = ref<any>(null)
-const token = ref('')
 const captchaButton = ref<HTMLElement | null>(null)
+const captcha = ref<any>(null)
+
+const codeForm = reactive({
+  email: '',
+  code: '',
+})
+
+const pwdForm = reactive({
+  email: '',
+  password: '',
+})
 
 const getInstance = (instance: any) => {
+  console.log(instance)
   captcha.value = instance
 }
 
 const captchaVerifyCallback = async (captchaVerifyParam: any) => {
-  const res = await sendcodeApi(captchaVerifyParam)
+  const res = await sendCodeApi(captchaVerifyParam)
   if (res.code === 1) {
-    const res_email = await sendemailApi(codeForm.email.trim())
+    await sendEmailApi(codeForm.email.trim())
     ElMessage.success('校验成功，已发送邮箱验证')
-    startCountdown(5)
+    startCountdown(60)
   } else {
     ElMessage.error('校验失败，重新校验')
+  }
+  return {
+    captchaResult: true,
+    bizResult: true,
   }
   return {
     captchaResult: true,
@@ -172,10 +185,105 @@ const forgot = async () => {
   ElMessage.success('功能未实现喵')
 }
 
-// 注册
+// 验证码倒计时
+const countdown = ref(0)
+let timer: number | undefined
+
+const startCountdown = (sec: number) => {
+  countdown.value = sec
+  if (timer) window.clearInterval(timer)
+  timer = window.setInterval(() => {
+    if (countdown.value <= 1) {
+      window.clearInterval(timer)
+      timer = undefined
+      countdown.value = 0
+    } else {
+      countdown.value--
+    }
+  }, 1000)
+}
+
+const sendCode = async () => {
+  const email = codeForm.email.trim()
+  if (!isValidEmail(email)) {
+    ElMessage.warning('请输入正确的邮箱地址')
+    return
+  }
+  captchaButton.value?.click()
+}
+
+const login = async () => {
+  let result: ApiResponse<LoginToken>
+  let email = activeTab.value === 'code' ? codeForm.email.trim() : pwdForm.email.trim()
+  if (!isValidEmail(email)) {
+    ElMessage.warning('请输入正确的邮箱')
+    return
+  }
+  if (activeTab.value === 'code') {
+    if (!codeForm.code.trim()) {
+      ElMessage.warning('请输入验证码')
+      return
+    }
+
+    result = await codeLoginApi({
+      email: codeForm.email,
+      code: codeForm.code,
+    })
+  } else {
+    if (!pwdForm.password) {
+      ElMessage.warning('请输入密码')
+      return
+    }
+
+    result = await loginApi({
+      email: pwdForm.email,
+      password: pwdForm.password,
+    })
+  }
+  if (result.code === 1) {
+    ElMessage.success('登录成功')
+    localStorage.setItem('login_user', JSON.stringify(result.data))
+    router.push('/index')
+  } else {
+    ElMessage.error(result.message)
+  }
+}
+
+const forgot = async () => {
+  ElMessage.success('功能未实现喵')
+}
+
 const register = () => {
   router.push('/register')
 }
+
+onMounted(async () => {
+  captchaButton.value = document.getElementById('captcha-button')
+
+  const script = document.createElement('script')
+  script.src = 'https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js'
+  script.async = true
+  script.onload = () => {
+    ;(window as any).initAliyunCaptcha({
+      SceneId: import.meta.env.VITE_ALIYUN_CAPTCHA_SCENE_ID,
+      prefix: import.meta.env.VITE_ALIYUN_CAPTCHA_PREFIX,
+      mode: 'popup',
+      button: '#captcha-button',
+      captchaVerifyCallback: captchaVerifyCallback,
+      getInstance: getInstance,
+      language: 'cn',
+    })
+  }
+
+  document.getElementsByTagName('head')[0]?.appendChild(script)
+})
+
+onBeforeUnmount(() => {
+  captchaButton.value = null
+
+  document.getElementById('aliyunCaptcha-mask')?.remove()
+  document.getElementById('aliyunCaptcha-window-popup')?.remove()
+})
 </script>
 
 <template>
@@ -233,14 +341,8 @@ const register = () => {
 
         <el-button class="button" type="primary" @click="login">登 录</el-button>
 
-        <!-- <div class="auth-hints" v-if="activeTab === 'password'">
-          <span>没有账号喵？</span>
-          <a href=" " class="register" @click="register">注册</a >
-          <span class="sep">|</span>
-          <a href="#">找回密码</a >
-        </div> -->
-        <div class="auth-hints">
-          <a href="#" class="left" @click="forgot" v-if="activeTab === 'password'">忘记密码</a>
+        <div class="auth-hints" v-if="activeTab === 'password'">
+          <a href="#" class="left" @click="forgot">忘记密码</a>
           <a href="#" class="right register" @click="register">立即注册</a>
         </div>
       </div>

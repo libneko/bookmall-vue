@@ -6,14 +6,14 @@ export const loginApi = (data: LoginForm): Promise<ApiResponse<LoginToken>> => {
   return request.post('/user/login/password', data)
 }
 
-export const sendcodeApi = (code: string): Promise<ApiResponse<ReceiveCodeflag>> => {
+export const sendCodeApi = (code: string): Promise<ApiResponse<ReceiveCodeflag>> => {
   return request.post('/user/login/verify', { code })
 }
 
-export const codeloginApi = (data: CodeLogin): Promise<ApiResponse<LoginToken>> => {
+export const codeLoginApi = (data: CodeLogin): Promise<ApiResponse<LoginToken>> => {
   return request.post('/user/login/code', data)
 }
 
-export const sendemailApi = (email: string): Promise<ApiResponse<object>> => {
+export const sendEmailApi = (email: string): Promise<ApiResponse<object>> => {
   return request.post(`/user/login/send?email=${email}`)
 }

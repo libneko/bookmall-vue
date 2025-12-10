@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { getBooks, getCategories } from '@/api/home'
+import { getCategories, getRandomBooks } from '@/api/home'
 import type { Book, Category } from '@/api/types'
-import BookCard from '@/component/book.vue'
-import _ from 'lodash'
 import { useRouter } from 'vue-router'
 import { openBook } from '@/api/meta'
+import BookGrid from '@/component/book-grid.vue'
 
 // 分类数据
 const router = useRouter()
@@ -18,10 +17,17 @@ const suggestBooks = ref<Book[]>([])
 
 const loadData = async () => {
   categories.value = (await getCategories()).data
-  books.value = (await getBooks()).data
+  const res = await getRandomBooks(23)
+  books.value = res.data
+  banners.value = books.value.slice(0, 3)
+  suggestBooks.value = books.value.slice(3, 23)
+}
 
-  banners.value = _.sampleSize(books.value, 3)
-  suggestBooks.value = _.sampleSize(books.value, 20)
+const searchCategory = (id: number) => {
+  router.push({
+    path: '/search',
+    query: { categoryId: id },
+  })
 }
 
 const searchCategory = (id: number) => {
@@ -78,11 +84,7 @@ onMounted(() => {
       </div>
 
       <div class="book-title">猜你喜欢</div>
-      <div class="book-grid">
-        <div class="book-item" v-for="book in suggestBooks" :key="book.id">
-          <BookCard :book="book" />
-        </div>
-      </div>
+      <BookGrid :books="suggestBooks" />
     </el-main>
 
     <!-- 底部版权区 -->
@@ -98,14 +100,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 关键修改：全局禁用滚动条（包括body和根容器） */
-/* 1. 禁用根组件的滚动 */
-.home {
-  overflow: hidden; /* 核心：隐藏根容器滚动 */
-  height: 92vh; /* 确保根容器占满视口高度 */
-}
-
-/* 核心内容区 - 关键修改：移除内容区滚动，改为由根容器控制 */
 .content {
   padding: 10px 40px;
   height: 100%; /* 计算内容区高度（视口高度 - 顶部padding - 底部footer高度） */
@@ -117,16 +111,6 @@ onMounted(() => {
 .banner-wrap {
   background-color: #f5f7fa;
   margin-bottom: 16px;
-}
-
-.book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-  gap: 20px;
-}
-
-.book-item {
-  cursor: pointer;
 }
 
 /* 横向分类栏 */

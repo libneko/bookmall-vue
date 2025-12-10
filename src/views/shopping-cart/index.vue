@@ -55,7 +55,7 @@ const fetchShoppingCartData = async () => {
 
       ElMessage.success(`成功加载 ${response.data.length} 件商品`)
     } else {
-      ElMessage.error(response.msg || '获取购物车数据失败')
+      ElMessage.error(response.message)
     }
   } catch (error) {
     console.error('获取购物车数据失败:', error)
@@ -157,7 +157,7 @@ const handleQuantityChange = async (item: Product) => {
     if (response.code === 1) {
       ElMessage.success(`已更新 ${item.name} 的数量`)
     } else {
-      ElMessage.error(response.msg || '更新数量失败')
+      ElMessage.error(response.message)
       // 失败时重新获取数据恢复状态
       await fetchShoppingCartData()
     }
@@ -185,7 +185,7 @@ const removeItem = async (id: number) => {
       await fetchShoppingCartData()
       ElMessage.success('商品删除成功')
     } else {
-      ElMessage.error(response.msg || '删除商品失败')
+      ElMessage.error(response.message)
     }
   } catch {
     ElMessage.info('已取消删除')
@@ -212,7 +212,7 @@ const clearCart = async () => {
       store.value.items = []
       ElMessage.success('购物车已清空')
     } else {
-      ElMessage.error(response.msg || '清空购物车失败')
+      ElMessage.error(response.message)
     }
   } catch {
     ElMessage.info('已取消清空操作')
