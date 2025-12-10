@@ -15,7 +15,6 @@ const input3 = ref('')
 
 const select = ref(1)
 const isFirstLoad = ref(true)
-const success_search = ref(false)
 
 let bookList = ref<Book[]>([])
 const categories = ref<Category[]>([])
@@ -67,7 +66,7 @@ watch(
 
 onMounted(async () => {
   categories.value = (await getCategories()).data
-  const id = Number(route.query.category_id)
+  const id = Number(route.query.categoryId)
   if (!isNaN(id)) {
     select.value = id // ⭐ 自动更新下拉框
   }
