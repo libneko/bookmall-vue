@@ -1,118 +1,103 @@
 <script setup lang="ts">
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { onMounted, ref } from 'vue'
+import type { LoginToken } from '@/api/types'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 // 当前登录的员工
-const login_name = ref('')
-const login_id = ref(1)
+const login_user = ref<LoginToken | null>(null)
 const router = useRouter()
 
-// 跳转到购物车页面
-const goCart = () => {
-  router.push({ name: 'shopping-cart' })
+// 下拉菜单逻辑
+const isDropdownOpen = ref(false)
+const dropdownRef = ref<HTMLElement | null>(null)
+
+const toggleDropdown = () => {
+  isDropdownOpen.value = !isDropdownOpen.value
+}
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    isDropdownOpen.value = false
+  }
 }
 
 onMounted(() => {
-  const login_user = JSON.parse(localStorage.getItem('login_user')!)
-  if (login_user && login_user.name) {
-    login_name.value = login_user.name
-    login_id.value = login_user.id
-  }
+  login_user.value = JSON.parse(localStorage.getItem('login_user')!) as LoginToken
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 
 // 退出登录
 const logout = () => {
-  // 弹出对话框
-  ElMessageBox.confirm('您确认退出登录吗？', '提示', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
-    .then(async () => {
-      ElMessage.success('退出成功')
-      localStorage.removeItem('login_user')
-      // 跳转登录
-      router.push('/login')
-    })
-    .catch(() => {
-      ElMessage.info('您已取消退出')
-    })
+  localStorage.removeItem('login_user')
+  router.push('/login')
 }
 
-const information = () => {
-  router.push({
-    path: '/personal-information',
-    query: {
-      id: login_id.value,
-    },
-  })
+const profile = () => {
+  window.open('/profile', '_blank')
 }
 </script>
 
 <template>
-  <div class="common-layout">
+  <el-container>
+    <!-- 左侧菜单 -->
+    <el-aside class="aside">
+      <el-menu router="true">
+        <!-- 首页菜单 -->
+        <div class="title">
+          <span>小书架</span>
+        </div>
+        <div class="menu_item">
+          <el-menu-item index="/index">
+            <el-icon><Promotion /></el-icon> 首页
+          </el-menu-item>
+          <el-menu-item index="/search">
+            <el-icon><Search /></el-icon> 搜索
+          </el-menu-item>
+          <el-menu-item index="/shopping-cart">
+            <el-icon><ShoppingCart /></el-icon> 购物车
+          </el-menu-item>
+        </div>
+      </el-menu>
+    </el-aside>
+
     <el-container>
-      <!-- 左侧菜单 -->
-      <el-aside class="aside">
-        <el-menu router="true">
-          <!-- 首页菜单 -->
-          <div class="title">
-            <span>小书架</span>
-          </div>
-          <div class="menu_item">
-            <el-menu-item index="/index">
-              <el-icon><Promotion /></el-icon> 首页
-            </el-menu-item>
-            <el-menu-item index="/search">
-              <el-icon><Search /></el-icon> 搜索
-            </el-menu-item>
-            <el-sub-menu index="/search">
-              <template #title>
-                <el-icon><Menu /></el-icon>
-                <span>分类</span>
-              </template>
-              <el-menu-item-group title="热 门">
-                <el-menu-item index="1-1">item one</el-menu-item>
-                <el-menu-item index="1-2">item two</el-menu-item>
-              </el-menu-item-group>
-            </el-sub-menu>
-            <el-menu-item index="/shopping-cart">
-              <el-icon><ShoppingCart /></el-icon> 购物车
-            </el-menu-item>
-          </div>
-        </el-menu>
-      </el-aside>
+      <el-header class="header">
+        <span class="left_title">{{ router.currentRoute.value.meta.title }}</span>
 
-      <el-container>
-        <!-- Header 区域 -->
-        <el-header class="header">
-          <span class="left_title">{{ router.currentRoute.value.meta.title }}</span>
+        <div class="user-dropdown" ref="dropdownRef">
+          <img :src="login_user?.avatar" class="icon" @click="toggleDropdown" />
 
-          <span class="right_tool">
-            <a href="" @click="information">
-              <el-icon><EditPen /></el-icon> 个人信息 &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
-            </a>
-            <a href="javascript:void(0);" @click="logout">
-              <el-icon><SwitchButton /></el-icon> 退出登录 【{{ login_name }}】
-            </a>
-          </span>
-        </el-header>
+          <Transition name="dropdown">
+            <div v-show="isDropdownOpen" class="dropdown-menu">
+              <div class="dropdown-item">
+                <div class="user-info">
+                  <img :src="login_user?.avatar" class="icon-small" />
+                  <span>{{ login_user?.username }}</span>
+                </div>
+              </div>
+              <div class="dropdown-item" @click="profile">个人信息</div>
+              <div class="dropdown-item" @click="logout">退出登录</div>
+            </div>
+          </Transition>
+        </div>
+      </el-header>
 
-        <el-main class="main-content">
-          <router-view></router-view>
-        </el-main>
-      </el-container>
+      <el-main class="main-content">
+        <router-view></router-view>
+      </el-main>
     </el-container>
-  </div>
+  </el-container>
 </template>
 
 <style scoped>
 .main-content {
   background-color: rgba(248, 228, 228, 0.2);
-  margin-left: 13%;
-  margin-top: 3.9%;
-  padding: 0px;
+  height: calc(100vh - 60px);
+  overflow-y: auto;
 }
 
 .header {
@@ -126,16 +111,9 @@ const information = () => {
     rgba(20, 19, 19, 0.8),
     rgba(20, 19, 19, 1)
   );
-  width: calc(100% - 13%);
-  height: 8%;
-  position: fixed; /* 固定在页面 */
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  top: 0; /* 顶部 */
-  left: 0;
-  z-index: 1000; /* 层级高一点 */
-  margin-left: 13%;
+  align-items: center;
+  display: flex;
 }
 
 .title {
@@ -156,31 +134,82 @@ const information = () => {
   line-height: 50px;
 }
 
-.right_tool {
-  float: right;
-  line-height: 60px;
-}
-
 a {
   color: rgb(230, 218, 218);
   text-decoration: none;
 }
 
 .aside {
-  width: 13%;
+  width: 200px;
   border-right: 1px solid #ccc;
-  height: 100vh;
   background-color: rgba(241, 218, 218, 0.1);
-  position: fixed; /* 固定定位 */
-  height: 100vh; /* 占满整个视口高度 */
-  overflow-y: auto; /* 允许内容滚动 */
-  gap: 2rem;
+  height: 100vh;
 }
 
 .menu_item {
   display: flex;
   flex-direction: column;
-
   background-color: rgba(241, 218, 218, 0.1);
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: 50%;
+  margin: 5px;
+}
+
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  z-index: 2000;
+  min-width: 160px;
+  padding: 10px;
+  transform-origin: top right;
+}
+
+.dropdown-item {
+  padding: 0 20px;
+  line-height: 36px;
+  cursor: pointer;
+  color: #606266;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background-color: #f3f3f3;
+  border-radius: 5px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-small {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(10px) scale(0.9);
 }
 </style>

@@ -7,6 +7,7 @@ import RegisterView from '@/views/register/index.vue'
 import ShoppingCartView from '@/views/shopping-cart/index.vue'
 import SearchView from '@/views/search/index.vue'
 import IntroductionView from '@/views/Introduction/index.vue'
+import ProfileView from '@/views/profile/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,11 +41,30 @@ const router = createRouter({
           meta: { title: '书本详情' },
           props: true,
         },
+        {
+          path: '/profile',
+          name: 'profile',
+          component: ProfileView,
+          meta: { title: '个人资料' },
+        },
       ],
     },
     { path: '/login', name: 'login', component: LoginView },
     { path: '/register', name: 'register', component: RegisterView },
   ],
+})
+
+function isLoggedIn(): boolean {
+  const user = localStorage.getItem('login_user')
+  return !!user
+}
+
+router.beforeEach((to, from, next) => {
+  if (!isLoggedIn() && to.name !== 'login' && to.name !== 'register') {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
 })
 
 export default router
