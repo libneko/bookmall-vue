@@ -98,6 +98,7 @@ const profile = () => {
   background-color: rgba(248, 228, 228, 0.2);
   height: calc(100vh - 60px);
   overflow-y: auto;
+  padding: 0%;
 }
 
 .header {

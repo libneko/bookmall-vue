@@ -130,6 +130,7 @@ export interface User {
   id: number
   username: string
   email: string
+  password: string
   phone: string
   sex: number
   avatar: string

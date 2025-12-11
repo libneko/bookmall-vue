@@ -30,13 +30,6 @@ const searchCategory = (id: number) => {
   })
 }
 
-const searchCategory = (id: number) => {
-  router.push({
-    path: '/search',
-    query: { categoryId: id },
-  })
-}
-
 // Banner轮播逻辑
 const currentIndex = ref(0)
 

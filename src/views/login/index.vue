@@ -11,17 +11,6 @@ const router = useRouter()
 const activeTab = ref<'code' | 'password'>('code')
 const captchaButton = ref<HTMLElement | null>(null)
 const captcha = ref<any>(null)
-
-const codeForm = reactive({
-  email: '',
-  code: '',
-})
-
-const pwdForm = reactive({
-  email: '',
-  password: '',
-})
-
 const getInstance = (instance: any) => {
   console.log(instance)
   captcha.value = instance
@@ -40,40 +29,7 @@ const captchaVerifyCallback = async (captchaVerifyParam: any) => {
     captchaResult: true,
     bizResult: true,
   }
-  return {
-    captchaResult: true,
-    bizResult: true,
-  }
 }
-
-onMounted(async () => {
-  captchaButton.value = document.getElementById('captcha-button')
-
-  const script = document.createElement('script')
-  script.src = 'https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js'
-  script.async = true
-  script.onload = () => {
-    ;(window as any).initAliyunCaptcha({
-      SceneId: '1e2a76e1',
-      prefix: '1az1z6',
-      mode: 'popup',
-      button: '#captcha-button',
-      captchaVerifyCallback: captchaVerifyCallback,
-      getInstance: getInstance,
-      language: 'cn',
-    })
-  }
-
-  document.getElementsByTagName('head')[0]?.appendChild(script)
-})
-
-onBeforeUnmount(() => {
-  captchaButton.value = null
-
-  // 必须删除相关元素，否则再次mount多次调用 initAliyunCaptcha 会导致多次回调 captchaVerifyCallback
-  document.getElementById('aliyunCaptcha-mask')?.remove()
-  document.getElementById('aliyunCaptcha-window-popup')?.remove()
-})
 
 const codeForm = reactive({
   email: '',
@@ -84,107 +40,6 @@ const pwdForm = reactive({
   email: '',
   password: '',
 })
-
-// 发送验证码倒计时
-const countdown = ref(0)
-let timer: number | undefined
-
-const startCountdown = (sec = 5) => {
-  countdown.value = sec
-  if (timer) window.clearInterval(timer)
-  timer = window.setInterval(() => {
-    if (countdown.value <= 1) {
-      window.clearInterval(timer)
-      timer = undefined
-      countdown.value = 0
-    } else {
-      countdown.value--
-    }
-  }, 1000)
-}
-
-// 发送邮箱验证码
-const sendCode = async () => {
-  const email = codeForm.email.trim()
-
-  if (!emailReg.test(email)) {
-    ElMessage.warning('请输入正确的邮箱地址')
-    return
-  }
-
-  if (countdown.value > 0) return
-
-  // 触发 captcha-button 点击（阿里云验证码会自动处理）
-  captchaButton.value?.click()
-}
-
-// 登录
-// 邮箱登录
-const login = async () => {
-  try {
-    let payload_login: LoginForm
-    let paylaod_code: CodeLogin
-
-    // ✅ 1️⃣ 密码登录
-    if (activeTab.value === 'password') {
-      if (!emailReg.test(pwdForm.email)) {
-        ElMessage.warning('请输入正确的邮箱')
-        return
-      }
-
-      if (!pwdForm.password) {
-        ElMessage.warning('请输入密码')
-        return
-      }
-
-      payload_login = {
-        email: pwdForm.email,
-        password: pwdForm.password,
-      }
-      const result = await loginApi(payload_login)
-      if (result.code === 1) {
-        ElMessage.success('登录成功')
-        localStorage.setItem('login_user', JSON.stringify(result.data))
-        router.push('/index')
-      } else {
-        ElMessage.error(result.msg)
-      }
-
-      // ✅ 2️⃣ 验证码登录
-    } else {
-      if (!emailReg.test(codeForm.email)) {
-        ElMessage.warning('请输入正确的邮箱')
-        return
-      }
-
-      if (!codeForm.code) {
-        ElMessage.warning('请输入验证码')
-        return
-      }
-
-      // ⚠ 若后端没有验证码登录接口，临时复用 password 字段
-      paylaod_code = {
-        email: codeForm.email,
-        code: codeForm.code,
-      }
-      const result = await codeloginApi(paylaod_code)
-
-      if (result.code === 1) {
-        ElMessage.success('登录成功')
-        localStorage.setItem('login_user', JSON.stringify(result.data))
-        router.push('/index')
-      } else {
-        ElMessage.error(result.msg)
-      }
-    }
-  } catch (e) {
-    ElMessage.error('登录失败，请稍后重试')
-  }
-}
-
-const forgot = async () => {
-  ElMessage.success('功能未实现喵')
-}
 
 // 验证码倒计时
 const countdown = ref(0)
@@ -289,53 +144,53 @@ onBeforeUnmount(() => {
 
 <template>
   <AuthLayout>
-        <el-tabs v-model="activeTab" class="login-tabs" stretch="false">
-          <el-tab-pane label="验证码登录" name="code">
-            <el-form>
-              <p class="title">欢迎回来</p>
+    <el-tabs v-model="activeTab" class="login-tabs" stretch="false">
+      <el-tab-pane label="验证码登录" name="code">
+        <el-form>
+          <p class="title">欢迎回来</p>
 
-              <el-form-item>
-                <el-input v-model="codeForm.email" placeholder="请输入邮箱" maxlength="20" />
-              </el-form-item>
+          <el-form-item>
+            <el-input v-model="codeForm.email" placeholder="请输入邮箱" maxlength="20" />
+          </el-form-item>
 
-              <el-form-item>
-                <el-input v-model="codeForm.code" placeholder="请输入验证码" maxlength="6">
-                  <template #append>
-                    <el-button id="captcha-button" :disabled="countdown > 0" @click="sendCode">
-                      {{ countdown > 0 ? countdown + '秒后可再次获取' : '获取验证码' }}
-                    </el-button>
-                  </template>
-                </el-input>
-              </el-form-item>
-            </el-form>
-          </el-tab-pane>
+          <el-form-item>
+            <el-input v-model="codeForm.code" placeholder="请输入验证码" maxlength="6">
+              <template #append>
+                <el-button id="captcha-button" :disabled="countdown > 0" @click="sendCode">
+                  {{ countdown > 0 ? countdown + '秒后可再次获取' : '获取验证码' }}
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
 
-          <el-tab-pane label="密码登录" name="password">
-            <el-form>
-              <p class="title">欢迎回来</p>
+      <el-tab-pane label="密码登录" name="password">
+        <el-form>
+          <p class="title">欢迎回来</p>
 
-              <el-form-item>
-                <el-input v-model="pwdForm.email" placeholder="请输入邮箱" maxlength="20" />
-              </el-form-item>
+          <el-form-item>
+            <el-input v-model="pwdForm.email" placeholder="请输入邮箱" maxlength="20" />
+          </el-form-item>
 
-              <el-form-item>
-                <el-input
-                  v-model="pwdForm.password"
-                  type="password"
-                  placeholder="请输入密码"
-                  show-password
-                />
-              </el-form-item>
-            </el-form>
-          </el-tab-pane>
-        </el-tabs>
+          <el-form-item>
+            <el-input
+              v-model="pwdForm.password"
+              type="password"
+              placeholder="请输入密码"
+              show-password
+            />
+          </el-form-item>
+        </el-form>
+      </el-tab-pane>
+    </el-tabs>
 
-        <el-button class="button" type="primary" @click="login">登 录</el-button>
+    <el-button class="button" type="primary" @click="login">登 录</el-button>
 
-        <div class="auth-hints" v-if="activeTab === 'password'">
-          <a href="#" class="left" @click="forgot">忘记密码</a>
-          <a href="#" class="right register" @click="register">立即注册</a>
-        </div>
+    <div class="auth-hints" v-if="activeTab === 'password'">
+      <a href="#" class="left" @click="forgot">忘记密码</a>
+      <a href="#" class="right register" @click="register">立即注册</a>
+    </div>
   </AuthLayout>
 </template>
 
