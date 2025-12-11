@@ -26,11 +26,11 @@ defineProps<{
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.7);
+  background-color: var(--el-bg-color-overlay);
 }
 .book-img {
   width: 100%;
-  height: 200px;
+  height: 90%;
 }
 
 .book-name {

@@ -18,14 +18,17 @@ const isSearched = ref(false)
 const bookList = ref<Book[]>([])
 const categories = ref<Category[]>([])
 
+const total = ref(0)
+const currentPage = ref(Number(route.query.page || 1))
+const pageSize = ref(Number(route.query.pageSize || 10))
+
 const handleSearch = () => {
   const query: Record<string, any> = {}
-  if (searchKeyword.value) {
-    query.name = searchKeyword.value
-  }
-  if (selectedCategoryId.value) {
-    query.category_id = selectedCategoryId.value
-  }
+  if (searchKeyword.value) query.name = searchKeyword.value
+  if (selectedCategoryId.value) query.category_id = selectedCategoryId.value
+  query.page = 1
+  query.pageSize = pageSize.value
+
   router.push({
     path: '/search',
     query,
@@ -35,14 +38,17 @@ const handleSearch = () => {
 const fetchBooks = async () => {
   const name = String(route.query.name || '')
   const categoryId = Number(route.query.category_id || 0)
+  const page = Number(route.query.page || 1)
+  const size = Number(route.query.pageSize || 10)
 
   if (!name && categoryId === 0) {
+    // 随机推荐
     try {
-      const res = await getRandomBooks(12)
-      console.log(res.data.length)
+      const res = await getRandomBooks(size)
       if (res.code === 1) {
         isSearched.value = true
         bookList.value = res.data
+        total.value = res.data.length
       }
     } catch (error) {
       console.error(error)
@@ -50,27 +56,45 @@ const fetchBooks = async () => {
     return
   }
 
+  // 搜索结果
   const res = await searchApi({
-    page: Number(route.query.page || 1),
-    page_size: Number(route.query.pageSize || 6),
+    page,
+    page_size: size,
     name: name,
     category_id: categoryId,
     status: 1,
   })
 
-  if (res.code === 1 && res.data.records.length > 0) {
+  if (res.code === 1) {
     isSearched.value = true
     bookList.value = res.data.records
+    total.value = res.data.total
     ElMessage.success('搜索成功')
   } else {
     ElMessage.error('未找到书籍')
     bookList.value = []
+    total.value = 0
   }
 }
 
+const handlePageChange = (page: number) => {
+  currentPage.value = page
+  router.push({
+    path: '/search',
+    query: {
+      ...route.query,
+      page,
+      pageSize: pageSize.value,
+    },
+  })
+}
+
+// 监听 URL 查询参数变化
 watch(
   () => route.query,
   () => {
+    currentPage.value = Number(route.query.page || 1)
+    pageSize.value = Number(route.query.pageSize || 10)
     fetchBooks()
   },
   { immediate: true },
@@ -114,7 +138,20 @@ onMounted(async () => {
         </template>
       </el-input>
     </div>
+
     <BookGrid v-if="isSearched" :books="bookList" />
+
+    <!-- 分页 -->
+    <el-pagination
+      v-if="isSearched && total > pageSize"
+      background
+      layout="prev, pager, next, jumper"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      :total="total"
+      @current-change="handlePageChange"
+      style="margin-top: 20px; text-align: center"
+    />
   </div>
 </template>
 

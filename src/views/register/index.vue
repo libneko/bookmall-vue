@@ -31,7 +31,7 @@ const register = async () => {
     ElMessage.success('注册成功')
     localStorage.setItem('login_user', JSON.stringify(result.data))
     // 跳转页面 - 首页
-    router.push('/index')
+    router.push('/')
   } else {
     ElMessage.error('传输注册数据失败')
   }
@@ -143,15 +143,15 @@ const login = () => {
 }
 
 .auth-hints {
-  text-align: center;
-  margin-top: 9%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
   font-size: 14px;
-  color: rgba(148, 75, 75, 0.8);
 }
 
 .auth-hints a {
+  color: var(--el-color-primary);
   cursor: pointer;
-  color: rgba(148, 75, 75, 0.8);
-  margin: 0 6px;
+  text-decoration: none;
 }
 </style>

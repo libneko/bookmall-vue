@@ -100,7 +100,7 @@ const login = async () => {
   if (result.code === 1) {
     ElMessage.success('登录成功')
     localStorage.setItem('login_user', JSON.stringify(result.data))
-    router.push('/index')
+    router.push('/')
   } else {
     ElMessage.error(result.message)
   }

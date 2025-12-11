@@ -38,10 +38,10 @@
 }
 
 .form-side {
-  background-color: rgba(255, 255, 255, 0.8);
-  border: 1px solid #e0e0e0;
+  background-color: var(--el-bg-color);
+  border: 1px solid var(--el-border-color);
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--el-box-shadow);
   padding: 40px;
   z-index: 2;
   display: flex;

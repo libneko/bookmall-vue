@@ -10,6 +10,7 @@ import {
 import type { ApiResponse, Product, ShoppingCartItem, Store } from '@/api/types'
 import { bookApi } from '@/api/introduction'
 import { openBook } from '@/api/meta'
+import router from '@/router'
 
 // 加载状态
 const loading = ref(false)
@@ -52,8 +53,6 @@ const fetchShoppingCartData = async () => {
         }
       })
       updateStoreIndeterminate(store.value)
-
-      ElMessage.success(`成功加载 ${response.data.length} 件商品`)
     } else {
       ElMessage.error(response.message)
     }
@@ -183,7 +182,6 @@ const removeItem = async (id: number) => {
       // 删除成功后重新获取数据
       console.log('删除商品成功，刷新数据', response)
       await fetchShoppingCartData()
-      ElMessage.success('商品删除成功')
     } else {
       ElMessage.error(response.message)
     }
@@ -244,12 +242,6 @@ const handleCheckout = () => {
     .catch(() => {
       ElMessage.info('您已取消结算')
     })
-}
-
-// 方法 - 去购物
-const goShopping = () => {
-  ElMessage.info('跳转到商品页面')
-  // 实际项目中这里会有路由跳转逻辑
 }
 
 // 生命周期
@@ -375,7 +367,7 @@ onMounted(() => {
       <!-- 空购物车状态 -->
       <div v-if="cartItems.length === 0" class="empty-cart">
         <el-empty description="购物车空空如也">
-          <el-button type="primary" @click="goShopping">去购物</el-button>
+          <el-button type="primary" @click="router.push('/')">去购物</el-button>
         </el-empty>
       </div>
     </el-card>
@@ -471,11 +463,6 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.store-name {
-  font-weight: 600;
-  color: #333;
 }
 
 .store-action {
