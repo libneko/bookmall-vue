@@ -79,16 +79,6 @@ onMounted(() => {
       <div class="book-title">猜你喜欢</div>
       <BookGrid :books="suggestBooks" />
     </el-main>
-
-    <!-- 底部版权区 -->
-    <el-footer class="footer">
-      <div class="footer-links">
-        <el-link href="#">关于我们</el-link>
-        <el-link href="#">隐私政策</el-link>
-        <el-link href="#">联系方式</el-link>
-        <el-link href="#">售后服务</el-link>
-      </div>
-    </el-footer>
   </el-container>
 </template>
 
@@ -102,7 +92,6 @@ onMounted(() => {
 
 /* Banner样式 */
 .banner-wrap {
-  background-color: #f5f7fa;
   margin-bottom: 16px;
 }
 
@@ -119,22 +108,5 @@ onMounted(() => {
   font-weight: bold;
   margin-top: 20px;
   margin-bottom: 15px;
-}
-
-/* 底部版权区 */
-.footer {
-  background-color: #f5f5f5;
-  padding: 40px;
-  font-size: 12px;
-  color: #666;
-  box-sizing: border-box;
-}
-
-.footer-links {
-  margin-bottom: 20px;
-}
-.footer-links .el-link {
-  margin-right: 20px;
-  color: #666;
 }
 </style>

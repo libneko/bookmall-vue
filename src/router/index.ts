@@ -18,7 +18,7 @@ const router = createRouter({
       component: LayoutView,
       children: [
         {
-          path: '/index',
+          path: '/',
           name: 'index',
           component: IndexView,
         },
@@ -59,8 +59,8 @@ function isLoggedIn(): boolean {
   return !!user
 }
 
-router.beforeEach((to, from, next) => {
-  if (!isLoggedIn() && to.name !== 'login' && to.name !== 'register') {
+router.beforeEach((to, _from, next) => {
+  if (!isLoggedIn() && to.name !== 'login' && to.name !== 'register' && to.name !== 'index') {
     next({ name: 'login' })
   } else {
     next()
