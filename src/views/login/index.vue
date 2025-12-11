@@ -5,6 +5,7 @@ import type { ApiResponse, LoginToken } from '@/api/types'
 import { ElMessage } from 'element-plus'
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import AuthLayout from '@/component/auth-layout.vue'
 
 const router = useRouter()
 const activeTab = ref<'code' | 'password'>('code')
@@ -287,17 +288,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div id="container">
-    <div class="login-card">
-      <div class="login-image">
-        <img
-          src="https://neko-book.oss-cn-hangzhou.aliyuncs.com/background.jpg"
-          alt="Login Image"
-          style="object-fit: cover; width: 100%; height: 100%; border-radius: 20px"
-        />
-      </div>
-
-      <div class="login-form">
+  <AuthLayout>
         <el-tabs v-model="activeTab" class="login-tabs" stretch="false">
           <el-tab-pane label="验证码登录" name="code">
             <el-form>
@@ -345,45 +336,10 @@ onBeforeUnmount(() => {
           <a href="#" class="left" @click="forgot">忘记密码</a>
           <a href="#" class="right register" @click="register">立即注册</a>
         </div>
-      </div>
-    </div>
-  </div>
+  </AuthLayout>
 </template>
 
 <style scoped>
-#container {
-  min-height: 100vh;
-  background-color: rgba(250, 204, 204, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-card {
-  width: 80%;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-image {
-  width: 90%;
-  height: 100%;
-}
-
-.login-form {
-  padding: 40px;
-  margin: 0 auto;
-  width: 30%;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  background-color: rgba(255, 255, 255, 0.8);
-  margin-left: -50px;
-}
-
 :deep(.el-input__suffix) {
   position: absolute;
   right: 10px;

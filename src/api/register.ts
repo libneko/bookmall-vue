@@ -1,7 +1,7 @@
 import request from '@/utils/request'
-import type { ApiResponse, RegisterForm } from './types'
+import type { ApiResponse, LoginToken, RegisterForm } from './types'
 
 // 登录
-export const registerApi = (data: RegisterForm): Promise<ApiResponse<RegisterForm>> => {
+export const registerApi = (data: RegisterForm): Promise<ApiResponse<LoginToken>> => {
   return request.post('/user/register', data)
 }

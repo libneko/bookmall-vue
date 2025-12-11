@@ -5,18 +5,17 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormRules, FormInstance } from 'element-plus'
 import { registerApi } from '@/api/register'
+import AuthLayout from '@/component/auth-layout.vue'
 
 const registerForm = ref<RegisterForm>({
   email: '',
   password: '',
-  name: '',
+  username: '',
 })
 
 const router = useRouter()
 
 const formRef = ref<FormInstance>()
-
-const select_Sex = ref('')
 
 const passwordForm = reactive({
   password: '',
@@ -28,16 +27,13 @@ const register = async () => {
   console.log(registerForm.value)
 
   const result = await registerApi(registerForm.value)
-
   if (result.code === 1) {
-    // 提示信息
     ElMessage.success('注册成功')
-    // 存储当前登录用户信息
-
+    localStorage.setItem('login_user', JSON.stringify(result.data))
     // 跳转页面 - 首页
-    router.push('/login')
+    router.push('/index')
   } else {
-    ElMessage.success('传输注册数据失败')
+    ElMessage.error('传输注册数据失败')
   }
 }
 
@@ -78,94 +74,49 @@ const login = () => {
 </script>
 
 <template>
-  <div id="container">
-    <div class="login-card">
-      <div class="login-image">
-        <img
-          src="https://neko-book.oss-cn-hangzhou.aliyuncs.com/background.jpg"
-          alt="Login Image"
-          style="object-fit: cover; width: 100%; height: 100%; border-radius: 20px"
-        />
-      </div>
+  <AuthLayout>
+    <el-form :model="passwordForm" :rules="rules" ref="formRef" label-width="80px">
+      <p class="title">加入大家庭</p>
+      <el-form-item label="注册邮箱" prop="email">
+        <el-input v-model="registerForm.email" placeholder="邮箱登录用喵"></el-input>
+      </el-form-item>
 
-      <div class="login-form">
-        <el-form :model="passwordForm" :rules="rules" ref="formRef" label-width="80px">
-          <p class="title">加入大家庭</p>
-          <el-form-item label="注册邮箱" prop="email">
-            <el-input v-model="registerForm.email" placeholder="邮箱登录用喵"></el-input>
-          </el-form-item>
+      <el-form-item label="名称" prop="username">
+        <el-input v-model="registerForm.username" placeholder="起个名喵"></el-input>
+      </el-form-item>
 
-          <el-form-item label="名称" prop="name">
-            <el-input v-model="registerForm.name" placeholder="起个名喵"></el-input>
-          </el-form-item>
+      <el-form-item label="密码" prop="password">
+        <el-input
+          type="password"
+          minlength="8"
+          maxlength="20"
+          v-model="passwordForm.password"
+          placeholder="输入密码（8-20位）"
+          show-password
+        ></el-input>
+      </el-form-item>
 
-          <el-form-item label="密码" prop="password">
-            <el-input
-              type="password"
-              minlength="8"
-              maxlength="20"
-              v-model="passwordForm.password"
-              placeholder="输入密码（8-20位）"
-              show-password
-            ></el-input>
-          </el-form-item>
+      <el-form-item label="确认密码" prop="confirmPassword">
+        <el-input
+          type="password"
+          v-model="passwordForm.confirmPassword"
+          placeholder="请再输入密码"
+          show-password
+        ></el-input>
+      </el-form-item>
 
-          <el-form-item label="确认密码" prop="confirmPassword">
-            <el-input
-              type="password"
-              v-model="passwordForm.confirmPassword"
-              placeholder="请再输入密码"
-              show-password
-            ></el-input>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button class="button" type="primary" @click="submit">注 册</el-button>
-          </el-form-item>
-        </el-form>
-        <div class="auth-hints">
-          <span>已有账号喵？</span>
-          <a href="#" class="register" @click="login">登录</a>
-        </div>
-      </div>
+      <el-form-item>
+        <el-button class="button" type="primary" @click="submit">注 册</el-button>
+      </el-form-item>
+    </el-form>
+    <div class="auth-hints">
+      <span>已有账号喵？</span>
+      <a href="#" class="register" @click="login">登录</a>
     </div>
-  </div>
+  </AuthLayout>
 </template>
 
 <style scoped>
-#container {
-  min-height: 100vh;
-  background-color: rgba(250, 204, 204, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-card {
-  width: 80%;
-  border-radius: 20px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-image {
-  width: 90%;
-  height: 100%;
-}
-
-.login-form {
-  padding: 40px;
-  margin: 0 auto;
-  width: 30%;
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  background-color: rgba(255, 255, 255, 0.8);
-  margin-left: -50px;
-}
-
 :deep(.el-input__suffix) {
   position: absolute;
   right: 10px;

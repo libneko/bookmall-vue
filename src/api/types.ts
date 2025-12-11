@@ -22,11 +22,12 @@ export interface LoginToken {
   id: number
   username: string
   email: string
+  avatar: string
   token: string
 }
 
 export interface RegisterForm {
-  name: string
+  username: string
   password: string
   email: string
 }
@@ -123,4 +124,13 @@ export interface Store {
   selected: boolean
   indeterminate: boolean
   items: Product[]
+}
+
+export interface User {
+  id: number
+  username: string
+  email: string
+  phone: string
+  sex: number
+  avatar: string
 }
