@@ -65,30 +65,22 @@ const handleEditPassword = () => {
 }
 
 const triggerInput = () => {
-  // 使用可選鏈 (Optional Chaining) ?.
-  // 如果 fileInputRef.value 存在，才執行 click()
   fileInputRef.value?.click()
 }
 
 const handleFileChange = async (event: Event) => {
-  // TS 核心點：Event target 默認是泛型的，不包含 files 屬性
-  // 我們需要使用 'as' 關鍵字將其斷言為 HTMLInputElement
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
-  // 檢查是否有文件被選中
-
-  // --- 類型校驗 ---
-  // TS 會自動推斷 file 是 File 類型，所以會有 type 和 size 屬性
   const isJPGOrPNG = file.type === 'image/jpeg' || file.type === 'image/png'
   const isLt2M = file.size / 1024 / 1024 < 2
   selectedFile.value = file
   if (!isJPGOrPNG) {
-    alert('只能上傳 JPG/PNG 文件!')
+    alert('只能上传 JPG/PNG 文件!')
     return
   }
   if (!isLt2M) {
-    alert('圖片大小不能超過 2MB!')
+    alert('图片大小不能超过 2MB!')
     return
   }
   target.value = ''
@@ -96,15 +88,15 @@ const handleFileChange = async (event: Event) => {
 
 const uploadToServer = async (file: File) => {
   try {
-    // 發送請求
+    // 发送请求
     const response = await upload(file)
     if (response.code === 1) {
       form.avatar = response.data
       ElMessage.success('上传头像成功')
     }
   } catch (error) {
-    ElMessage.error('頭像上傳失敗，請重試')
-    console.error('上傳失敗:', error)
+    ElMessage.error('头像上传失败，请重试')
+    console.error('上传失败:', error)
   }
 }
 
@@ -142,7 +134,7 @@ const submit = async () => {
   }
   try {
     await formRef.value.validateField(fieldsToValidate)
-    // 3. 執行保存
+    // 3. 执行保存
     await save()
   } catch (error) {
     ElMessage.error('请检查输入的数据是否正确')
@@ -157,7 +149,7 @@ const save = async () => {
       await uploadToServer(selectedFile.value)
     }
     if (res.code === 1) {
-      ElMessage.success('用户信息已更新，頁面即將刷新')
+      ElMessage.success('用户信息已更新，页面即将刷新')
       setTimeout(() => {
         location.reload()
       }, 1000)
@@ -281,21 +273,21 @@ const save = async () => {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
-  align-items: center; /* 水平置中所有子元素 */
+  align-items: center; /* 水平居中所有子元素 */
   cursor: pointer; /* 设置鼠标悬停时显示手型 */
-  position: relative; /* 讓內部的 absolute 元素以這裡為基準 */
+  position: relative; /* 让内部的 absolute 元素以这里为基准 */
   width: 100px;
   margin-left: calc((100% - 100px) / 2);
   height: 100px;
-  overflow: hidden; /* 重要：超出圓形的部分隱藏，讓遮罩層也是圓的 */
+  overflow: hidden; /* 重要：超出圆形的部分隐藏，让遮罩层也是圆的 */
 }
 
 .avatar {
   width: 100px;
   height: 100px;
   display: block;
-  border-radius: 50%; /* 圓形 */
-  object-fit: cover; /* 保持圖片比例，不會變形 */
+  border-radius: 50%; /* 圆形 */
+  object-fit: cover; /* 保持图片比例，不会变形 */
 }
 
 .mask {
@@ -303,27 +295,27 @@ const save = async () => {
   top: 0;
   left: 0;
   margin-left: calc((100% - 100px) / 2);
-  border-radius: 50%; /* 圓形 */
+  border-radius: 50%; /* 圆形 */
   width: 100px;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5); /* 深色半透明背景 */
-  display: flex; /* 使用 Flex 讓文字垂直水平置中 */
+  display: flex; /* 使用 Flex 让文字垂直水平居中 */
   justify-content: center;
   align-items: center;
-  opacity: 0; /* 預設完全透明（看不見） */
-  transition: opacity 0.3s ease; /* 增加過渡動畫，讓效果更滑順 */
+  opacity: 0; /* 默认完全透明（看不见） */
+  transition: opacity 0.3s ease; /* 增加过渡动画，让效果更平滑 */
 }
 
-/* 4. 文字設定 */
+/* 4. 文字设置 */
 .text {
   color: #fff; /* 白色文字 */
   font-size: 14px;
   font-weight: bold;
 }
 
-/* 5. 互動效果：滑鼠移入容器時，顯示遮罩 */
+/* 5. 交互效果：鼠标移入容器时，显示遮罩 */
 .avatar-wrapper:hover .mask {
-  opacity: 1; /* 變為不透明（顯示） */
+  opacity: 1; /* 变为不透明（显示） */
 }
 
 .profile-title {
