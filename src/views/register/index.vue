@@ -40,13 +40,13 @@ const register = async () => {
 // 自定义校验器：检查两次密码是否一致
 const validateConfirmPassword = (rule: any, value: string, callback: any) => {
   if (!value) {
-    ElMessage.error('请再次输入密码')
+    callback(new Error('请再次输入密码'))
   } else if (value.length < 8) {
-    ElMessage.error('密码长度不能少于8位')
+    callback(new Error('密码长度不能少于8位'))
   } else if (value.length > 20) {
-    ElMessage.error('密码长度不能超过20位')
+    callback(new Error('密码长度不能超过20位'))
   } else if (value !== passwordForm.password) {
-    ElMessage.error('两次输入的密码不一致')
+    callback(new Error('两次输入的密码不一致'))
   } else {
     callback()
   }
@@ -76,13 +76,13 @@ const login = () => {
 <template>
   <AuthLayout>
     <el-form :model="passwordForm" :rules="rules" ref="formRef" label-width="80px">
-      <p class="title">加入大家庭</p>
+      <p class="title">注册账户</p>
       <el-form-item label="注册邮箱" prop="email">
-        <el-input v-model="registerForm.email" placeholder="邮箱登录用喵"></el-input>
+        <el-input v-model="registerForm.email" placeholder="请输入邮箱"></el-input>
       </el-form-item>
 
-      <el-form-item label="名称" prop="username">
-        <el-input v-model="registerForm.username" placeholder="起个名喵"></el-input>
+      <el-form-item label="用户名" prop="username">
+        <el-input v-model="registerForm.username" placeholder="输入用户名"></el-input>
       </el-form-item>
 
       <el-form-item label="密码" prop="password">
@@ -105,14 +105,10 @@ const login = () => {
         ></el-input>
       </el-form-item>
 
-      <el-form-item>
-        <el-button class="button" type="primary" @click="submit">注 册</el-button>
-      </el-form-item>
+      <el-form-item> </el-form-item>
     </el-form>
-    <div class="auth-hints">
-      <span>已有账号喵？</span>
-      <a href="#" class="register" @click="login">登录</a>
-    </div>
+    <el-button type="primary" @click="submit">注 册</el-button>
+    <el-link href="#" underline="never" @click="login">已有账号？去登录</el-link>
   </AuthLayout>
 </template>
 
@@ -135,23 +131,5 @@ const login = () => {
   text-align: center;
   margin-bottom: 30px;
   font-weight: bold;
-}
-
-.button {
-  margin-top: 30px;
-  width: 60%;
-}
-
-.auth-hints {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.auth-hints a {
-  color: var(--el-color-primary);
-  cursor: pointer;
-  text-decoration: none;
 }
 </style>

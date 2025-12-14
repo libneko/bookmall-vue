@@ -25,19 +25,14 @@ onMounted(async () => {
 })
 
 const addShopping = async (book_id: BookData) => {
-  try {
-    console.log(book_id)
-    const res = await addShoppingCartApi(book_id)
-    console.log(res)
-    // 成功提示
-    if (res.code !== 0) {
-      console.log('加入成功:', res)
-      ElMessage.success('已加入购物车')
-    } else {
-      ElMessage.error('加入失败')
-    }
-  } catch (err) {
-    console.error(err)
+  console.log(book_id)
+  const res = await addShoppingCartApi(book_id)
+  console.log(res)
+  // 成功提示
+  if (res.code !== 0) {
+    console.log('加入成功:', res)
+    ElMessage.success('已加入购物车')
+  } else {
     ElMessage.error('加入失败')
   }
 }
