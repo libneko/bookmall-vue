@@ -3,6 +3,7 @@ import type { LoginToken } from '@/api/types'
 import { Theme, setTheme as applyTheme } from '@/api/meta'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import NavMenu from '@/component/nav-menu.vue'
 
 // 当前登录的员工
 const login_user = ref<LoginToken | null>(null)
@@ -59,45 +60,59 @@ const handleSetTheme = (theme: Theme) => {
   isAppearanceOpen.value = false
   isDropdownOpen.value = false
 }
+
+// 移动端适配
+const isMobile = ref(false)
+const drawerVisible = ref(false)
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+  if (!isMobile.value) {
+    drawerVisible.value = false
+  }
+}
+
+onMounted(() => {
+  login_user.value = JSON.parse(localStorage.getItem('login_user')!) as LoginToken
+  document.addEventListener('click', handleClickOutside)
+  window.addEventListener('storage', handleStorageChange)
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('storage', handleStorageChange)
+  window.removeEventListener('resize', checkMobile)
+})
 </script>
 
 <template>
   <el-container>
+    <!-- 移动端抽屉菜单 -->
+    <el-drawer
+      v-model="drawerVisible"
+      direction="ltr"
+      size="200px"
+      :with-header="false"
+      class="mobile-drawer"
+    >
+      <div class="aside-content">
+        <NavMenu @menu-click="drawerVisible = false" />
+      </div>
+    </el-drawer>
+
     <!-- 左侧菜单 -->
-    <el-aside class="aside">
-      <el-menu router="true">
-        <!-- 首页菜单 -->
-        <div class="title">
-          <span>小书架</span>
-        </div>
-        <div class="menu_item">
-          <el-menu-item index="/">
-            <el-icon><Promotion /></el-icon> 首页
-          </el-menu-item>
-          <el-menu-item index="/search">
-            <el-icon><Search /></el-icon> 搜索
-          </el-menu-item>
-          <el-menu-item index="/shopping-cart">
-            <el-icon><ShoppingCart /></el-icon> 借阅车
-          </el-menu-item>
-          <el-menu-item index="/order">
-            <el-icon><Document /></el-icon> 图书管理
-          </el-menu-item>
-          <el-menu-item index="/book-management">
-            <el-icon><Document /></el-icon> 图书管理
-          </el-menu-item>
-          <el-menu-item index="/user-management">
-            <el-icon><UserFilled /></el-icon> 用户管理
-          </el-menu-item>
-          <el-menu-item index="/notice">
-            <el-icon><ChatDotRound /></el-icon> 通知
-          </el-menu-item>          
-        </div>
-      </el-menu>
+
+    <el-aside class="aside" v-if="!isMobile">
+      <NavMenu />
     </el-aside>
 
     <el-container>
       <el-header class="header">
+        <div class="mobile-menu-btn" v-if="isMobile" @click="drawerVisible = true">
+          <el-icon size="24" color="#ecc0c0"><Menu /></el-icon>
+        </div>
         <span class="left_title">{{ router.currentRoute.value.meta.title }}</span>
 
         <div class="user-dropdown" ref="dropdownRef" v-if="login_user != null">
@@ -171,7 +186,6 @@ const handleSetTheme = (theme: Theme) => {
 
 <style scoped>
 .main-content {
-  background-color: rgba(248, 228, 228, 0.2);
   height: calc(100vh - 60px);
   overflow-y: auto;
   padding: 0%;
@@ -193,16 +207,6 @@ const handleSetTheme = (theme: Theme) => {
   display: flex;
 }
 
-.title {
-  background-color: rgba(241, 218, 218, 0.1);
-  font-size: 40px;
-  font-family: 楷体;
-  line-height: 60px;
-  font-weight: bolder;
-  width: 100%;
-  text-align: center;
-}
-
 .left_title {
   color: rgb(236, 192, 192);
   font-size: 30px;
@@ -219,12 +223,6 @@ a {
   width: 200px;
   background-color: rgba(241, 218, 218, 0.1);
   height: 100vh;
-}
-
-.menu_item {
-  display: flex;
-  flex-direction: column;
-  background-color: rgba(241, 218, 218, 0.1);
 }
 
 .icon {
@@ -317,5 +315,36 @@ a {
 
 .check-icon {
   margin-right: 5px;
+}
+
+.mobile-menu-btn {
+  margin-right: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.aside-content {
+  height: 100%;
+  background-color: rgba(241, 218, 218, 0.1);
+}
+
+:deep(.mobile-drawer .el-drawer__body) {
+  padding: 0;
+  background-color: var(--el-bg-color);
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 10px;
+  }
+
+  .left_title {
+    font-size: 20px;
+  }
+
+  .user-info span {
+    display: none;
+  }
 }
 </style>

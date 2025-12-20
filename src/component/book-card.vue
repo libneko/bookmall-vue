@@ -47,4 +47,19 @@ defineProps<{
   text-decoration: none;
   color: inherit;
 }
+
+@media (max-width: 768px) {
+  .book-card {
+    height: 240px;
+  }
+  .book-name {
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .book-price {
+    font-size: 14px;
+  }
+}
 </style>

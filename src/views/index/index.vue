@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { getCategories, getRandomBooks } from '@/api/home'
 import type { Book, Category } from '@/api/types'
 import { useRouter } from 'vue-router'
@@ -14,6 +14,7 @@ const books = ref<Book[]>([])
 const banners = ref<Book[]>([])
 // 推荐图书
 const suggestBooks = ref<Book[]>([])
+const isMobile = ref(false)
 
 const loadData = async () => {
   categories.value = (await getCategories()).data
@@ -30,12 +31,22 @@ const searchCategory = (id: number) => {
   })
 }
 
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
 // Banner轮播逻辑
 const currentIndex = ref(0)
 
 // 自动轮播
 onMounted(() => {
   loadData()
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
 })
 </script>
 
@@ -45,7 +56,11 @@ onMounted(() => {
     <el-main class="content">
       <!-- 顶部 Banner（放在最上面） -->
       <div class="banner-wrap">
-        <el-carousel :current-index="currentIndex" class="banner-carousel" height="500px">
+        <el-carousel
+          :current-index="currentIndex"
+          class="banner-carousel"
+          :height="isMobile ? '200px' : '500px'"
+        >
           <el-carousel-item
             v-for="(banner, index) in banners"
             :key="index"
@@ -108,5 +123,11 @@ onMounted(() => {
   font-weight: bold;
   margin-top: 20px;
   margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    padding: 10px;
+  }
 }
 </style>

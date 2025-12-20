@@ -13,7 +13,7 @@
 
 <style scoped>
 .auth-container {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   background-color: rgba(250, 204, 204, 0.5);
   display: flex;
@@ -21,6 +21,7 @@
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .image-side {
@@ -28,11 +29,16 @@
   margin-right: -60px;
   z-index: 1;
   flex-shrink: 1;
+  max-height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .image-side img {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: cover;
   border-radius: 20px;
 }
@@ -66,6 +72,9 @@
 @media (max-width: 768px) {
   .auth-container {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
   }
 
   .image-side {

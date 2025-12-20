@@ -22,6 +22,13 @@ defineProps<{
   gap: 20px;
 }
 
+@media (max-width: 768px) {
+  .book-grid {
+    grid-template-columns: repeat(2, 1fr); /* 强制两列 */
+    gap: 10px;
+  }
+}
+
 .book-item {
   cursor: pointer;
 }

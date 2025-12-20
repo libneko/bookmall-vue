@@ -28,19 +28,14 @@ onMounted(async () => {
 })
 
 const addShopping = async (book_id: BookData) => {
-  try {
-    console.log(book_id)
-    const res = await addShoppingCartApi(book_id)
-    console.log(res)
-    // 成功提示
-    if (res.code !== 0) {
-      console.log('加入成功:', res)
-      ElMessage.success('已加入购物车')
-    } else {
-      ElMessage.error('加入失败')
-    }
-  } catch (err) {
-    console.error(err)
+  console.log(book_id)
+  const res = await addShoppingCartApi(book_id)
+  console.log(res)
+  // 成功提示
+  if (res.code !== 0) {
+    console.log('加入成功:', res)
+    ElMessage.success('已加入购物车')
+  } else {
     ElMessage.error('加入失败')
   }
 }
@@ -193,20 +188,21 @@ const handleChange = (value: number | undefined) => {
 }
 
 .books-buy {
-  margin-top: 18%;
-  padding-bottom: 5%;
-  font-size: 150%;
-  width: 70%;
-  padding-left: 50%;
-  height: 15%;
-  font-weight: bold;
+  margin-top: 50px;
+  padding-bottom: 20px;
+  font-size: 20px;
+  width: 100%;
   display: flex;
   flex-direction: row;
-  gap: 5%;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  font-weight: bold;
 }
 
 .books-col1-row2 {
   padding-right: 5%;
+  white-space: nowrap; /* 防止价格换行 */
 }
 
 .books-price p {
@@ -215,7 +211,7 @@ const handleChange = (value: number | undefined) => {
   color: rgb(229, 94, 52);
   font-weight: bold; /* 粗体 */
   font-style: italic; /* 斜体 */
-  font-size: 300%;
+  font-size: 40px; /* 使用固定大小代替百分比 */
 }
 
 .books-pic img {
@@ -225,12 +221,12 @@ const handleChange = (value: number | undefined) => {
   display: block;
 }
 :deep(.el-button) {
-  width: 30%;
-  height: 90%;
+  width: 120px; /* 固定宽度 */
+  height: 40px;
   background-color: rgb(229, 94, 52);
 }
 :deep(.el-input-number) {
-  width: 30%;
+  width: 150px; /* 固定宽度 */
 }
 
 :deep(.el-input-number__decrease) {
@@ -242,5 +238,126 @@ const handleChange = (value: number | undefined) => {
 
 :deep(.el-icon) {
   color: black;
+}
+
+/* 平板/小屏幕笔记本适配 */
+@media (max-width: 1200px) {
+  .introduction-view {
+    padding: 30px;
+    padding-left: 30px;
+  }
+
+  .books-col1 {
+    flex-wrap: wrap; /* 允许换行 */
+    height: auto;
+  }
+
+  .books-col1-row {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .books-col1-row2 {
+    width: 100%;
+    padding-right: 0;
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .books-price p {
+    font-size: 30px;
+  }
+
+  .books-buy {
+    margin-top: 20px;
+    justify-content: flex-start; /* 空间不足时左对齐 */
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .introduction-view {
+    padding: 10px;
+    height: auto;
+    padding-left: 10px;
+  }
+
+  .books {
+    flex-direction: column;
+    width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+  }
+
+  .books-row1 {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .books-pic {
+    height: 250px;
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .books-row2 {
+    width: 100%;
+    padding: 0;
+  }
+
+  .books-col1 {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .books-col1-row {
+    width: 100%;
+  }
+
+  .books-col1-row2 {
+    margin-top: 15px;
+    padding-right: 0;
+    border-top: 1px dashed #eee;
+    padding-top: 10px;
+  }
+
+  .books-title h2 {
+    font-size: 20px;
+    margin: 0;
+  }
+
+  .books-price h3 {
+    font-size: 14px;
+  }
+
+  .books-price p {
+    font-size: 24px;
+  }
+
+  .books-col2 {
+    margin-top: 20px;
+  }
+
+  .books-buy {
+    margin-top: 20px;
+    padding-left: 0;
+    width: 100%;
+    flex-direction: column;
+    gap: 15px;
+    height: auto;
+  }
+
+  :deep(.el-input-number) {
+    width: 100%;
+  }
+
+  :deep(.el-button) {
+    width: 100%;
+    height: 40px;
+    margin-left: 0 !important;
+  }
 }
 </style>
