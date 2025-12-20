@@ -46,8 +46,12 @@ export interface Book {
   price: number
   image: string
   description: string
-  status: string
-  book_stock: BookStock
+  status: number
+  stock: number
+  isbn: string
+  location: string
+  publisher: string
+  update_time: string
 }
 
 export interface Category {
@@ -97,6 +101,15 @@ export interface ShoppingDeleteForm {
   id: number
 }
 
+export interface SendOrder{
+  addressBookId: number
+  payMethod: number
+  estimatedDeliveryTime: string
+  shippingFee: number
+  amount: number
+}
+
+
 export interface SendPersonId {
   user_id: number
 }
@@ -107,7 +120,6 @@ export interface ReceivePerson {
   email: string
 }
 
-export interface SendCode {}
 export interface Product extends Book {
   quantity: number
   selected: boolean
@@ -134,4 +146,28 @@ export interface User {
   phone: string
   sex: number
   avatar: string
+}
+
+export interface items{
+  book_id: number
+  title: string
+  quantity: number
+  price: number
+}
+
+export interface Order{
+  order_id: string
+  books:items[]
+  total_price: number
+  status: number
+  address: string
+  create_time:string
+  
+}
+
+export interface Notice{
+  id:string
+  content:string
+  status:number
+  create_time:string
 }

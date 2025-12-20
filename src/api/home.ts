@@ -10,3 +10,7 @@ export const getCategories = (): Promise<ApiResponse<Category[]>> => {
 export const getRandomBooks = (number: number): Promise<ApiResponse<Book[]>> => {
   return request.get(`/user/book/random?number=${number}`)
 }
+
+export const getBooks = (data:number): Promise<ApiResponse<Book[]>> => {
+  return request.get(`/user/book/list?category_id=${data}`)
+}

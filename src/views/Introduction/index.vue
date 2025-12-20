@@ -14,6 +14,9 @@ let shopp = ref<BookData>({
 })
 let book_id: number
 
+
+
+
 const num = ref(1)
 
 onMounted(async () => {
@@ -65,16 +68,17 @@ const handleChange = (value: number | undefined) => {
               <h2>&nbsp;&nbsp;{{ book?.name }}</h2>
             </div>
             <div class="books-auth">
-              <p>作者:{{ book?.author }}</p>
-              <p>最后更新:</p>
-              <p>更新时间:</p>
+              <p>作者: {{ book?.author }}</p>
+              <p>IBNS: {{ book?.isbn }}</p>
+              <p>图书位置: {{ book?.location }}</p>
+              <p>出版社: {{ book?.publisher }} </p>
             </div>
           </div>
           <div class="books-col1-row2">
-            <div class="books-price">
+            <!--             <div class="books-price">
               <h3>单本价格(RMB):</h3>
               <p>{{ book?.price }}</p>
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="books-col2">
@@ -83,13 +87,13 @@ const handleChange = (value: number | undefined) => {
             <p>{{ book?.description }}</p>
           </div>
           <div class="books-buy">
-            <el-input-number
+            <!--             <el-input-number
               v-model="num"
               :min="1"
               :max="book?.book_stock?.stock"
               @change="handleChange"
-            />
-            <el-button type="primary" @click="addShopping(shopp)">加入购物车</el-button>
+            /> -->
+            <el-button type="primary" @click="addShopping(shopp)">加入借阅车</el-button>
           </div>
         </div>
       </div>

@@ -8,6 +8,10 @@ import ShoppingCartView from '@/views/shopping-cart/index.vue'
 import SearchView from '@/views/search/index.vue'
 import IntroductionView from '@/views/Introduction/index.vue'
 import ProfileView from '@/views/profile/index.vue'
+import OrderView from '@/views/order/index.vue'
+import BookManagementView from '@/views/book-management/index.vue'
+import UserManagementView from '@/views/user-management/index.vue'
+import NoticeView from '@/views/notice/index.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,7 +30,7 @@ const router = createRouter({
           path: '/shopping-cart',
           name: 'shopping-cart',
           component: ShoppingCartView,
-          meta: { title: '我的购物车' },
+          meta: { title: '我的借阅车' },
         },
         {
           path: '/search',
@@ -47,6 +51,30 @@ const router = createRouter({
           component: ProfileView,
           meta: { title: '个人资料' },
         },
+        {
+          path: '/order',
+          name: 'order',
+          component: OrderView,
+          meta: { title: '订单管理' },
+        },
+        {
+          path: '/book-management',
+          name: 'book-management',
+          component:  BookManagementView,
+          meta: { title: '图书管理' },
+        },
+        {
+          path: '/user-management',
+          name: 'user-management',
+          component: UserManagementView,
+          meta: { title: '用户管理' },
+        },
+        {
+          path: '/notice',
+          name: 'notice',
+          component: NoticeView,
+          meta: { title: '通知' },
+        }
       ],
     },
     { path: '/login', name: 'login', component: LoginView },

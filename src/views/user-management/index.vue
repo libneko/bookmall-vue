@@ -7,11 +7,9 @@ import { User, Search, Plus, Edit, Delete } from '@element-plus/icons-vue'
 interface UserItem {
   id: number
   username: string
-  name: string
-  gender: 'male' | 'female'
+  sex: 'male' | 'female'
   email: string
   phone: string
-  idCard: string
   status: 'active' | 'inactive'
   createTime: string
   selected: boolean
@@ -35,20 +33,16 @@ const pagination = ref({
 // 表单数据
 const newUserForm = ref({
   username: '',
-  name: '',
-  gender: 'male' as 'male' | 'female',
+  sex: 'male' as 'male' | 'female',
   email: '',
   phone: '',
-  idCard: '',
 })
 
 const editUserForm = ref({
   username: '',
-  name: '',
-  gender: 'male' as 'male' | 'female',
+  sex: 'male' as 'male' | 'female',
   email: '',
   phone: '',
-  idCard: '',
   status: 'active' as 'active' | 'inactive',
 })
 
@@ -58,10 +52,6 @@ const formRules = {
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 2, max: 20, message: '用户名长度在2到20个字符', trigger: 'blur' },
   ],
-  name: [
-    { required: true, message: '请输入姓名', trigger: 'blur' },
-    { min: 2, max: 10, message: '姓名长度在2到10个字符', trigger: 'blur' },
-  ],
   email: [
     { required: true, message: '请输入邮箱地址', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
@@ -69,10 +59,6 @@ const formRules = {
   phone: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' },
-  ],
-  idCard: [
-    { required: true, message: '请输入身份证号', trigger: 'blur' },
-    { pattern: /^\d{17}[\dXx]$/, message: '请输入正确的身份证号码', trigger: 'blur' },
   ],
 }
 
@@ -104,10 +90,8 @@ const filteredUsers = computed(() => {
   return userList.value.filter(
     (user) =>
       user.username.toLowerCase().includes(keyword) ||
-      user.name.toLowerCase().includes(keyword) ||
       user.email.toLowerCase().includes(keyword) ||
-      user.phone.includes(keyword) ||
-      user.idCard.includes(keyword),
+      user.phone.includes(keyword),
   )
 })
 
@@ -124,11 +108,9 @@ const fetchUserData = async () => {
       {
         id: 1,
         username: 'zhangsan',
-        name: '张三',
-        gender: 'male',
+        sex: 'male',
         email: 'zhangsan@example.com',
         phone: '13800138001',
-        idCard: '110101199001011234',
         status: 'active',
         createTime: '2024-01-15 10:30:00',
         selected: false,
@@ -136,11 +118,9 @@ const fetchUserData = async () => {
       {
         id: 2,
         username: 'lisi',
-        name: '李四',
-        gender: 'male',
+        sex: 'male',
         email: 'lisi@example.com',
         phone: '13800138002',
-        idCard: '110101199002022345',
         status: 'active',
         createTime: '2024-02-20 14:20:00',
         selected: false,
@@ -148,11 +128,9 @@ const fetchUserData = async () => {
       {
         id: 3,
         username: 'wangwu',
-        name: '王五',
-        gender: 'female',
+        sex: 'female',
         email: 'wangwu@example.com',
         phone: '13800138003',
-        idCard: '110101199003033456',
         status: 'inactive',
         createTime: '2024-03-10 09:00:00',
         selected: false,
@@ -181,12 +159,12 @@ const handleUserSelectChange = () => {
   // 选择状态变化逻辑可以由计算属性自动处理
 }
 
-const getGenderText = (gender: string): string => {
-  const genderMap: { [key: string]: string } = {
+const getsexText = (sex: string): string => {
+  const sexMap: { [key: string]: string } = {
     male: '男',
     female: '女',
   }
-  return genderMap[gender] || '未知'
+  return sexMap[sex] || '未知'
 }
 
 const getStatusText = (status: string): string => {
@@ -200,7 +178,7 @@ const getStatusText = (status: string): string => {
 const updateUserStatus = async (user: UserItem, status: 'active' | 'inactive') => {
   try {
     user.status = status
-    ElMessage.success(`已${getStatusText(status)}用户 ${user.name}`)
+    ElMessage.success(`已${getStatusText(status)}用户 ${user.username}`)
   } catch (error) {
     console.error('更新用户状态失败:', error)
     ElMessage.error('更新失败，请稍后重试')
@@ -244,7 +222,7 @@ const batchDeleteUsers = async () => {
 
 const resetPassword = async (user: UserItem) => {
   try {
-    await ElMessageBox.confirm(`确定要重置用户 ${user.name} 的密码吗？`, '重置密码', {
+    await ElMessageBox.confirm(`确定要重置用户 ${user.username} 的密码吗？`, '重置密码', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
@@ -259,11 +237,9 @@ const resetPassword = async (user: UserItem) => {
 const openAddUserDialog = () => {
   newUserForm.value = {
     username: '',
-    name: '',
-    gender: 'male',
+    sex: 'male',
     email: '',
     phone: '',
-    idCard: '',
   }
   showAddUserDialog.value = true
 }
@@ -277,11 +253,9 @@ const addUser = async () => {
     const newUser: UserItem = {
       id: newId,
       username: newUserForm.value.username,
-      name: newUserForm.value.name,
-      gender: newUserForm.value.gender,
+      sex: newUserForm.value.sex,
       email: newUserForm.value.email,
       phone: newUserForm.value.phone,
-      idCard: newUserForm.value.idCard,
       status: 'active',
       createTime: new Date().toLocaleString(),
       selected: false,
@@ -300,11 +274,9 @@ const openEditUserDialog = (user: UserItem) => {
   currentEditUser.value = user
   editUserForm.value = {
     username: user.username,
-    name: user.name,
-    gender: user.gender,
+    sex: user.sex,
     email: user.email,
     phone: user.phone,
-    idCard: user.idCard,
     status: user.status,
   }
   showEditUserDialog.value = true
@@ -322,7 +294,7 @@ const editUser = async () => {
       //     id: 1,
       //     username: editUserForm.value.username,
       //     name: editUserForm.value.name,
-      //     gender: editUserForm.value.gender,
+      //     sex: editUserForm.value.sex,
       //     email: editUserForm.value.email,
       //     phone: editUserForm.value.phone,
       //     idCard: editUserForm.value.idCard,
@@ -350,10 +322,6 @@ const handleCurrentChange = (newPage: number) => {
   fetchUserData()
 }
 
-const formatIdCard = (idCard: string) => {
-  if (idCard.length !== 18) return idCard
-  return `${idCard.substring(0, 6)}******${idCard.substring(14)}`
-}
 
 // 生命周期
 onMounted(() => {
@@ -366,7 +334,6 @@ onMounted(() => {
   <div class="user-management">
     <!-- 顶部标题栏 -->
     <div class="management-header">
-      <h2>用户管理系统</h2>
       <div class="header-actions">
         <el-button type="primary" @click="openAddUserDialog">
           <el-icon><Plus /></el-icon>
@@ -383,7 +350,7 @@ onMounted(() => {
     <div class="search-bar">
       <el-input
         v-model="searchKeyword"
-        placeholder="搜索用户名、姓名、邮箱、手机号或身份证号..."
+        placeholder="搜索用户名、邮箱、手机号..."
         clearable
         style="width: 300px"
       >
@@ -410,7 +377,6 @@ onMounted(() => {
         </el-checkbox>
         <span class="head-label">用户信息</span>
         <span class="head-label">联系方式</span>
-        <span class="head-label">身份证号</span>
         <span class="head-label">状态</span>
         <span class="head-label">操作</span>
       </div>
@@ -436,11 +402,11 @@ onMounted(() => {
               </el-avatar>
 
               <div class="user-details">
-                <h4 class="username">{{ user.name }}</h4>
+                <h4 class="username">{{ user.username }}</h4>
                 <div class="user-meta">
-                  <span class="username-id">@{{ user.username }}</span>
-                  <el-tag :type="user.gender === 'male' ? 'primary' : 'danger'" size="small">
-                    {{ getGenderText(user.gender) }}
+                  <span class="username-id">{{ user.email }}</span>
+                  <el-tag :type="user.sex === 'male' ? 'primary' : 'danger'" size="small">
+                    {{ getsexText(user.sex) }}
                   </el-tag>
                 </div>
                 <div class="create-time">注册时间: {{ user.createTime }}</div>
@@ -449,13 +415,7 @@ onMounted(() => {
 
             <!-- 联系方式 -->
             <div class="contact-info">
-              <div class="email">{{ user.email }}</div>
               <div class="phone">{{ user.phone }}</div>
-            </div>
-
-            <!-- 身份证号 -->
-            <div class="id-card-info">
-              <div class="id-card">{{ formatIdCard(user.idCard) }}</div>
             </div>
 
             <!-- 状态 -->
@@ -525,11 +485,8 @@ onMounted(() => {
         <el-form-item label="用户名" prop="username">
           <el-input v-model="newUserForm.username" placeholder="请输入用户名" />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="newUserForm.name" placeholder="请输入姓名" />
-        </el-form-item>
-        <el-form-item label="性别" prop="gender">
-          <el-radio-group v-model="newUserForm.gender">
+        <el-form-item label="性别" prop="sex">
+          <el-radio-group v-model="newUserForm.sex">
             <el-radio label="男" value="male" />
             <el-radio label="女" value="female" />
           </el-radio-group>
@@ -539,9 +496,6 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="newUserForm.phone" placeholder="请输入手机号" />
-        </el-form-item>
-        <el-form-item label="身份证号" prop="idCard">
-          <el-input v-model="newUserForm.idCard" placeholder="请输入身份证号" maxlength="18" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -556,11 +510,8 @@ onMounted(() => {
         <el-form-item label="用户名">
           <el-input v-model="editUserForm.username" disabled />
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="editUserForm.name" placeholder="请输入姓名" />
-        </el-form-item>
-        <el-form-item label="性别" prop="gender">
-          <el-radio-group v-model="editUserForm.gender">
+        <el-form-item label="性别" prop="sex">
+          <el-radio-group v-model="editUserForm.sex">
             <el-radio label="男" value="male" />
             <el-radio label="女" value="female" />
           </el-radio-group>
@@ -570,9 +521,6 @@ onMounted(() => {
         </el-form-item>
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="editUserForm.phone" placeholder="请输入手机号" />
-        </el-form-item>
-        <el-form-item label="身份证号" prop="idCard">
-          <el-input v-model="editUserForm.idCard" placeholder="请输入身份证号" maxlength="18" />
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="editUserForm.status">
@@ -587,32 +535,6 @@ onMounted(() => {
       </template>
     </el-dialog>
 
-    <!-- 底部统计栏 -->
-    <el-affix position="bottom" :offset="0" target=".user-management" v-if="userList.length > 0">
-      <div class="management-footer-affix">
-        <div class="footer-content">
-          <div class="footer-left">
-            <el-checkbox
-              v-model="selectAll"
-              :indeterminate="isIndeterminate"
-              @change="handleSelectAllChange"
-            >
-              全选
-            </el-checkbox>
-            <el-button link type="danger" @click="batchDeleteUsers" :disabled="selectedCount === 0">
-              批量删除 ({{ selectedCount }})
-            </el-button>
-          </div>
-
-          <div class="footer-right">
-            <div class="summary">
-              <span>已选 {{ selectedCount }} 名用户，</span>
-              <span>活跃用户: {{ activeUserCount }} 人</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </el-affix>
   </div>
 </template>
 

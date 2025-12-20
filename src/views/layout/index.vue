@@ -78,8 +78,20 @@ const handleSetTheme = (theme: Theme) => {
             <el-icon><Search /></el-icon> 搜索
           </el-menu-item>
           <el-menu-item index="/shopping-cart">
-            <el-icon><ShoppingCart /></el-icon> 购物车
+            <el-icon><ShoppingCart /></el-icon> 借阅车
           </el-menu-item>
+          <el-menu-item index="/order">
+            <el-icon><Document /></el-icon> 图书管理
+          </el-menu-item>
+          <el-menu-item index="/book-management">
+            <el-icon><Document /></el-icon> 图书管理
+          </el-menu-item>
+          <el-menu-item index="/user-management">
+            <el-icon><UserFilled /></el-icon> 用户管理
+          </el-menu-item>
+          <el-menu-item index="/notice">
+            <el-icon><ChatDotRound /></el-icon> 通知
+          </el-menu-item>          
         </div>
       </el-menu>
     </el-aside>

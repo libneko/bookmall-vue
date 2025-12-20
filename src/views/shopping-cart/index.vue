@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, computed, onMounted,reactive } from 'vue'
+import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   getShoppingCartApi,
   updateCartItemApi,
@@ -14,6 +14,28 @@ import router from '@/router'
 
 // 加载状态
 const loading = ref(false)
+const dialogVisible = ref(false)
+const isSubmitting = ref(false)
+const orderFormRef = ref<FormInstance>()
+
+const formData = reactive({
+  address: '',
+  paymentMethod: 'wechat' // 默认选中微信
+})
+const orderInfo = reactive({
+  estimatedTime: '2025-12-20 14:00 之前',
+  shippingFee: 12.00,
+  totalAmount: 299.00
+})
+const rules = reactive<FormRules>({
+  address: [
+    { required: true, message: '请填写收货地址', trigger: 'blur' },
+    { min: 5, message: '地址长度不能少于5个字符', trigger: 'blur' }
+  ],
+  paymentMethod: [
+    { required: true, message: '请选择支付方式', trigger: 'change' }
+  ]
+})
 
 // 店铺数据类型定义
 const store = ref<Store>({
@@ -49,7 +71,7 @@ const fetchShoppingCartData = async () => {
           specifications: ['默认规格'],
           freeShipping: cartItem.amount > 10,
           guarantee: true,
-          stock: bookDetail?.book_stock?.stock ?? 100,
+          stock: bookDetail?.stock ?? 100,
         }
       })
       updateStoreIndeterminate(store.value)
@@ -223,25 +245,35 @@ const handleCheckout = () => {
     ElMessage.warning('请选择要结算的商品')
     return
   }
+  dialogVisible.value = true
+  orderInfo.totalAmount= totalPrice.value + orderInfo.shippingFee
 
-  const totalAmount = totalPrice.value
-
-  ElMessageBox.confirm(
-    `确认结算 ${selectedCount.value} 件商品，总金额：¥${totalAmount.toFixed(2)}`,
-    '确认结算',
-    {
-      confirmButtonText: '去支付',
-      cancelButtonText: '再想想',
-      type: 'warning',
-    },
-  )
-    .then(() => {
-      ElMessage.success('订单创建成功，正在跳转支付...')
-      // 实际项目中这里会有支付跳转逻辑
-    })
-    .catch(() => {
-      ElMessage.info('您已取消结算')
-    })
+}
+const submitOrder = async () => {
+  if (!orderFormRef.value) return
+  
+  // 1. 校验表单
+  await orderFormRef.value.validate((valid) => {
+    if (valid) {
+      isSubmitting.value = true // 开启加载状态
+      
+      // 2. 模拟调用后端 API
+      setTimeout(() => {
+        console.log('提交的数据:', {
+          ...formData,
+          finalAmount: orderInfo.totalAmount
+        })
+        
+        ElMessage.success('订单创建成功，正在跳转支付...')
+        isSubmitting.value = false
+        dialogVisible.value = false
+        
+        // 此处可以添加跳转逻辑
+      }, 1500)
+    } else {
+      ElMessage.warning('请检查输入信息是否完整')
+    }
+  })
 }
 
 // 生命周期
@@ -255,7 +287,7 @@ onMounted(() => {
   <div class="shopping-cart">
     <!-- 顶部标题栏 -->
     <div class="cart-header">
-      <span class="selected-count">已选 {{ selectedCount }} 件商品</span>
+      <span class="selected-count">已选 {{ selectedCount }} 件图书</span>
     </div>
 
     <!-- 购物车内容区域 -->
@@ -271,24 +303,14 @@ onMounted(() => {
               >全选
             </el-checkbox>
           </el-col>
-          <el-col :span="10">商品</el-col>
+          <el-col :span="10">图书</el-col>
           <el-col class="head-label" :span="3">单价</el-col>
           <el-col class="head-label" :span="3">数量</el-col>
           <el-col class="head-label" :span="3">小计</el-col>
           <el-col class="head-label" :span="3">操作</el-col>
         </el-row>
       </template>
-      <div class="store-header">
-        <div class="store-info">
-          <el-checkbox
-            v-model="store.selected"
-            :indeterminate="store.indeterminate"
-            @change="() => handleStoreSelectChange(store)"
-          />
-          <span class="store-name">{{ store.name }}</span>
-          <el-button link type="primary" size="small" class="store-action"> 联系客服 </el-button>
-        </div>
-      </div>
+
 
       <!-- 店铺商品列表 -->
       <div class="store-items">
@@ -322,10 +344,6 @@ onMounted(() => {
                     <span class="spec" v-for="spec in item.specifications" :key="spec">
                       {{ spec }}
                     </span>
-                  </div>
-                  <div class="product-tags">
-                    <el-tag v-if="item.freeShipping" size="small" type="success">免运费</el-tag>
-                    <el-tag v-if="item.guarantee" size="small" type="warning">7天价保</el-tag>
                   </div>
                 </div>
               </el-row>
@@ -366,13 +384,76 @@ onMounted(() => {
 
       <!-- 空购物车状态 -->
       <div v-if="cartItems.length === 0" class="empty-cart">
-        <el-empty description="购物车空空如也">
-          <el-button type="primary" @click="router.push('/')">去购物</el-button>
+        <el-empty description="借阅车空空如也">
+          <el-button type="primary" @click="router.push('/')">去借阅</el-button>
         </el-empty>
       </div>
     </el-card>
   </div>
+  <el-dialog
+    v-model="dialogVisible"
+    title="确认订单"
+    width="500px"
+    destroy-on-close
+    :close-on-click-modal="false"
+  >
+    <el-descriptions :column="1" border class="mb-4">
+      <el-descriptions-item label="预计到达时间">
+        <el-tag type="info">{{ orderInfo.estimatedTime }}</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="商品邮费">
+        ¥{{ orderInfo.shippingFee }}
+      </el-descriptions-item>
+      <el-descriptions-item label="应付总金额">
+        <span class="total-price">¥{{ orderInfo.totalAmount }}</span>
+      </el-descriptions-item>
+    </el-descriptions>
 
+    <el-divider />
+
+    <el-form
+      ref="orderFormRef"
+      :model="formData"
+      :rules="rules"
+      label-width="80px"
+      label-position="top"
+    >
+      <el-form-item label="收货地址" prop="address">
+        <el-input
+          v-model="formData.address"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入详细收货地址 (例如：街道、门牌号)"
+          maxlength="100"
+          show-word-limit
+        />
+      </el-form-item>
+
+      <el-form-item label="支付方式" prop="paymentMethod">
+        <el-radio-group v-model="formData.paymentMethod">
+          <el-radio border label="wechat">
+            <span class="pay-icon"></span> 微信支付
+          </el-radio>
+          <el-radio border label="alipay">
+            <span class="pay-icon"></span> 支付宝
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+    </el-form>
+
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button 
+          type="primary" 
+          @click="submitOrder" 
+          :loading="isSubmitting"
+        >
+          立即支付 ¥{{ orderInfo.totalAmount }}
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
   <!-- 底部悬浮结算栏 -->
   <el-affix
     position="bottom"
