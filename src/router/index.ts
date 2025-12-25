@@ -60,7 +60,7 @@ const router = createRouter({
         {
           path: '/book-management',
           name: 'book-management',
-          component:  BookManagementView,
+          component: BookManagementView,
           meta: { title: '图书管理' },
         },
         {
@@ -74,7 +74,7 @@ const router = createRouter({
           name: 'notice',
           component: NoticeView,
           meta: { title: '通知' },
-        }
+        },
       ],
     },
     { path: '/login', name: 'login', component: LoginView },

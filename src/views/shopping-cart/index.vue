@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted,reactive } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   getShoppingCartApi,
   updateCartItemApi,
   deleteCartItemApi,
   clearCartApi,
+  SubmitOrderApi,
+  getAddressApi,
 } from '@/api/shopping-cart'
-import type { ApiResponse, Product, ShoppingCartItem, Store } from '@/api/types'
+import type { Address, ApiResponse, Product, SubmitOrder, ShoppingCartItem, Store } from '@/api/types'
 import { bookApi } from '@/api/introduction'
 import { openBook } from '@/api/meta'
 import router from '@/router'
@@ -17,25 +19,95 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const isSubmitting = ref(false)
 const orderFormRef = ref<FormInstance>()
+const itemTimers = new Map<number, any>()
+// 2. 用于存储全选操作的计时器
+let selectAllTimer: any = null
 
 const formData = reactive({
-  address: '',
-  paymentMethod: 'wechat' // 默认选中微信
+  addressId: null as number | null,
+  paymentMethod: 'wechat', // 默认选中微信
 })
+
 const orderInfo = reactive({
   estimatedTime: '2025-12-20 14:00 之前',
-  shippingFee: 12.00,
-  totalAmount: 299.00
+  shippingFee: 12.0,
+  totalAmount: 299.0,
 })
+
 const rules = reactive<FormRules>({
-  address: [
-    { required: true, message: '请填写收货地址', trigger: 'blur' },
-    { min: 5, message: '地址长度不能少于5个字符', trigger: 'blur' }
+  addressId: [
+    { required: true, message: '请选择收货地址', trigger: 'change' }
   ],
-  paymentMethod: [
-    { required: true, message: '请选择支付方式', trigger: 'change' }
-  ]
+  paymentMethod: [{ required: true, message: '请选择支付方式', trigger: 'change' }],
 })
+
+const addressList = ref<Address[]>([])
+
+const initMockData = () => {
+  addressList.value = [
+    {
+      id: 1,
+      userId: 1001,
+      consignee: '王小虎',
+      phone: '13800138000',
+      sex: 1,
+      province_code: '110000',
+      province_name: '北京市',
+      city_code: '110100',
+      city_name: '北京市',
+      district_code: '110105',
+      district_name: '朝阳区',
+      detail: '建国路88号SOHO现代城A座',
+      label: '公司',
+      is_default: true
+    },
+    {
+      id: 2,
+      userId: 1001,
+      consignee: '林黛玉',
+      phone: '13900009999',
+      sex: 0,
+      province_code: '320000',
+      province_name: '江苏省',
+      city_code: '320500',
+      city_name: '苏州市',
+      district_code: '320508',
+      district_name: '姑苏区',
+      detail: '桃花坞街道12号',
+      label: '家',
+      is_default: false
+    },
+    {
+      id: 3,
+      userId: 1001,
+      consignee: '贾宝玉',
+      phone: '13666666666',
+      sex: 1,
+      province_code: '440000',
+      province_name: '广东省',
+      city_code: '440300',
+      city_name: '深圳市',
+      district_code: '440305',
+      district_name: '南山区',
+      detail: '粤海街道科技园南区TCL大厦',
+      label: '', // 测试没有标签的情况
+      is_default: false
+    }
+  ]
+// 自动选中默认地址
+  const defaultAddr = addressList.value.find(addr => addr.is_default)
+  if (defaultAddr) {
+    formData.addressId = defaultAddr.id
+  }
+}
+
+const getFullAddress = (item: Address) => {
+  // 拼接省市区+详细地址
+  return `${item.province_name}${item.city_name}${item.district_name} ${item.detail}`
+}
+const formatAddressForInput = (item: Address) => {
+  return `${item.consignee} ${item.phone} - ${item.district_name} ${item.detail}`
+}
 
 // 店铺数据类型定义
 const store = ref<Store>({
@@ -50,31 +122,33 @@ const store = ref<Store>({
 const fetchShoppingCartData = async () => {
   loading.value = true
   try {
-    const response: ApiResponse<ShoppingCartItem[]> = await getShoppingCartApi()
+    const response = await getShoppingCartApi()
 
     if (response.code === 1 && response.data && Array.isArray(response.data)) {
       // 清空并重新填充数据
-
       const items = response.data
-
-      // 并行请求每个 book_id 对应的图书信息
       const bookPromises = items.map((item) => bookApi(item.book_id))
       const books = await Promise.all(bookPromises)
-      // 合并后端购物车项和图书详情，生成Product数组
+
+      // 合并数据
       store.value.items = items.map((cartItem, idx) => {
         const bookDetail = books[idx]!.data
-        console.log('书籍详情:', bookDetail)
         return {
           ...bookDetail,
+          // 关键修改 1: 绑定购物车ID，方便后续更新
+          cartId: cartItem.id, 
+          // 关键修改 2: 数量和选中状态都从后端取
           quantity: cartItem.number,
-          selected: true,
+          selected: Boolean(cartItem.selected), // 确保转为布尔值
+          
+          // 其他前端字段
           specifications: ['默认规格'],
           freeShipping: cartItem.amount > 10,
           guarantee: true,
           stock: bookDetail?.stock ?? 100,
         }
       })
-      updateStoreIndeterminate(store.value)
+      refreshStoreState()
     } else {
       ElMessage.error(response.message)
     }
@@ -86,6 +160,18 @@ const fetchShoppingCartData = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const fetchAddressData = async () => {
+  const res = await getAddressApi()
+  if (res.code === 1) {
+    console.log(res.data)
+    addressList.value=res.data
+  }
+  else {
+    
+  }
+  
 }
 
 // 计算属性 - 所有商品列表
@@ -105,64 +191,96 @@ const totalPrice = computed(() => {
     .reduce((total: number, item: Product) => total + item.price * item.quantity, 0)
 })
 
-// 计算属性 - 全选状态
-const selectAll = computed({
-  get: () =>
-    store.value && store.value.items.length > 0
-      ? store.value.items.every((item: Product) => item.selected)
-      : false,
-  set: (value: boolean) => {
-    if (!store.value) return
-    store.value.selected = value
-    store.value.items.forEach((item: Product) => {
-      item.selected = value
-    })
-    updateStoreIndeterminate(store.value)
-  },
-})
 
-// 计算属性 - 不确定状态
-const isIndeterminate = computed(() => {
-  if (!store.value) return false
-
-  const totalItems = store.value.items.length
-  const selectedItems = store.value.items.filter((item: Product) => item.selected).length
-
-  return (selectedItems > 0 && selectedItems < totalItems) || store.value.indeterminate
-})
 
 // 方法 - 更新店铺的不确定状态
-const updateStoreIndeterminate = (store: Store) => {
-  const selectedItems = store.items.filter((item: Product) => item.selected)
-  store.selected = selectedItems.length === store.items.length && store.items.length > 0
-  store.indeterminate = selectedItems.length > 0 && selectedItems.length < store.items.length
+const updateStoreIndeterminate = () => {
+  if (!store.value) return
+  
+  const items = store.value.items
+  const total = items.length
+  // 统计已选中的数量
+  const selectedCount = items.filter(item => item.selected).length
+
+  // 逻辑：如果选中的数量等于总数，且总数大于0，则为全选
+  store.value.selected = selectedCount === total && total > 0
+  
+  // 逻辑：如果选中数大于0 且 小于总数，则为半选状态
+  store.value.indeterminate = selectedCount > 0 && selectedCount < total
+}
+const refreshStoreState = () => {
+  const items = store.value.items
+  const total = items.length
+  // 计算已选中的数量
+  const selectedCount = items.filter(item => item.selected).length
+
+  // 全选条件：所有都被选中 且 列表不为空
+  store.value.selected = selectedCount === total && total > 0
+  // 半选条件：选中数大于0 且 小于总数
+  store.value.indeterminate = selectedCount > 0 && selectedCount < total
 }
 
-// 方法 - 处理全选变化
-const handleSelectAllChange = (value: boolean) => {
+const handleItemSelectChange = async (item: Product) => {
+
+  updateStoreIndeterminate()
+  if (itemTimers.has(item.id)) {
+    clearTimeout(itemTimers.get(item.id))
+  }    
+  // B. 发送请求给后端
+// 3. 设定一个新的计时器 (比如 1000ms 后执行)
+  const timer = setTimeout(async () => {
+    try {
+      console.log(`[防抖结束] 正在向后端同步商品ID: ${item.id}, 状态: ${item.selected}`)
+      
+      // TODO: 这里调用你的真实接口
+      // await updateCartItemApi({ id: item.cartId, selected: item.selected })
+      
+      // 请求成功后，从 Map 中移除该计时器记录
+      itemTimers.delete(item.id)
+    } catch (error) {
+      console.error('同步失败', error)
+      // 如果后端报错，可能需要在这里把 item.selected 改回去，并提示用户
+    }
+  }, 1000) // <--- 设置延迟时间，这里是 1 秒
+
+  // 4. 将计时器存入 Map
+  itemTimers.set(item.id, timer)
+}
+// 3. 店铺全选/取消全选
+const handleSelectAllChange = async (val: boolean) => {
   if (!store.value) return
 
-  store.value.selected = value
-  store.value.items.forEach((item: Product) => {
-    item.selected = value
+  // A. 前端视觉立即更新（循环设置所有商品）
+  store.value.items.forEach((item) => {
+    item.selected = val
   })
-  updateStoreIndeterminate(store.value)
+  // B. 更新半选状态 UI
+  updateStoreIndeterminate()
+  if (itemTimers.size > 0) {
+    itemTimers.forEach(timer => clearTimeout(timer))
+    itemTimers.clear()
+  }
+  if (selectAllTimer) {
+    clearTimeout(selectAllTimer)
+  }
+  // C. 发送请求给后端 (这里是你需要新增的逻辑)
+  selectAllTimer = setTimeout(async () => {
+    try {
+      console.log(`[防抖结束] 正在向后端同步全选状态: ${val}`)
+      
+      // TODO: 调用批量修改接口
+      // await updateCartBatchApi({ selected: val })
+      
+    } catch (error) {
+      console.error('全选同步失败', error)
+      // 失败回滚逻辑...
+    } finally {
+      selectAllTimer = null
+    }
+  }, 1000) // <--- 延迟 1 秒
 }
 
-// 方法 - 处理店铺选择变化
-const handleStoreSelectChange = (store: Store) => {
-  store.items.forEach((item: Product) => {
-    item.selected = store.selected
-  })
-  updateStoreIndeterminate(store)
-  // updateSelectAll()
-}
 
-// 方法 - 处理商品选择变化
-const handleItemSelectChange = (store: Store) => {
-  updateStoreIndeterminate(store)
-  // updateSelectAll()
-}
 
 // 方法 - 处理数量变化（调用API）
 const handleQuantityChange = async (item: Product) => {
@@ -246,30 +364,43 @@ const handleCheckout = () => {
     return
   }
   dialogVisible.value = true
-  orderInfo.totalAmount= totalPrice.value + orderInfo.shippingFee
-
+  orderInfo.totalAmount = totalPrice.value + orderInfo.shippingFee
 }
 const submitOrder = async () => {
   if (!orderFormRef.value) return
-  
+
   // 1. 校验表单
-  await orderFormRef.value.validate((valid) => {
+  await orderFormRef.value.validate(async (valid) => {
     if (valid) {
       isSubmitting.value = true // 开启加载状态
-      
-      // 2. 模拟调用后端 API
-      setTimeout(() => {
-        console.log('提交的数据:', {
-          ...formData,
-          finalAmount: orderInfo.totalAmount
-        })
-        
-        ElMessage.success('订单创建成功，正在跳转支付...')
+      const payMethodMap: Record<string, number> = {
+        'wechat': 1,
+        'alipay': 2
+      }
+      const requestData: SubmitOrder = {
+        addressBookId: formData.addressId!, // 使用 ! 断言，因为通过 validate 校验后一定不为空
+        payMethod: payMethodMap[formData.paymentMethod] ?? 1, 
+        estimatedDeliveryTime: orderInfo.estimatedTime,
+        shippingFee: orderInfo.shippingFee,
+        amount: orderInfo.totalAmount
+      }
+
+      const res = await SubmitOrderApi(requestData)
+      if (res.code === 1) {
+
+        setTimeout(() => {
+          isSubmitting.value = false
+          dialogVisible.value = false
+          // 此处可以添加跳转逻辑
+        }, 1500)
+        ElMessage.success('订单提交成功，请在订单管理支付')
+      } else {
+        ElMessage.error(res.message || '订单提交失败，请重试')
         isSubmitting.value = false
-        dialogVisible.value = false
-        
-        // 此处可以添加跳转逻辑
-      }, 1500)
+        return
+      }
+
+
     } else {
       ElMessage.warning('请检查输入信息是否完整')
     }
@@ -280,6 +411,7 @@ const submitOrder = async () => {
 onMounted(() => {
   console.log('购物车组件已加载')
   // 从后端API获取数据
+  initMockData()
   fetchShoppingCartData()
 })
 </script>
@@ -297,8 +429,8 @@ onMounted(() => {
         <el-row :gutter="24" align="middle">
           <el-col :span="2">
             <el-checkbox
-              v-model="selectAll"
-              :indeterminate="isIndeterminate"
+              v-model="store.selected"
+              :indeterminate="store.indeterminate"
               @change="handleSelectAllChange"
               >全选
             </el-checkbox>
@@ -310,7 +442,6 @@ onMounted(() => {
           <el-col class="head-label" :span="3">操作</el-col>
         </el-row>
       </template>
-
 
       <!-- 店铺商品列表 -->
       <div class="store-items">
@@ -324,7 +455,7 @@ onMounted(() => {
           <el-row :gutter="24" align="middle">
             <!-- 选择框 -->
             <el-col :span="2">
-              <el-checkbox v-model="item.selected" @change="() => handleItemSelectChange(store)" />
+              <el-checkbox v-model="item.selected" @change="() => handleItemSelectChange(item)" />
             </el-col>
 
             <!-- 商品信息 -->
@@ -401,9 +532,7 @@ onMounted(() => {
       <el-descriptions-item label="预计到达时间">
         <el-tag type="info">{{ orderInfo.estimatedTime }}</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="商品邮费">
-        ¥{{ orderInfo.shippingFee }}
-      </el-descriptions-item>
+      <el-descriptions-item label="商品邮费"> ¥{{ orderInfo.shippingFee }} </el-descriptions-item>
       <el-descriptions-item label="应付总金额">
         <span class="total-price">¥{{ orderInfo.totalAmount }}</span>
       </el-descriptions-item>
@@ -418,25 +547,43 @@ onMounted(() => {
       label-width="80px"
       label-position="top"
     >
-      <el-form-item label="收货地址" prop="address">
-        <el-input
-          v-model="formData.address"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入详细收货地址 (例如：街道、门牌号)"
-          maxlength="100"
-          show-word-limit
-        />
+      <el-form-item label="收货地址" prop="addressId">
+        <el-select 
+          v-model="formData.addressId" 
+          placeholder="请选择收货地址" 
+          style="width: 100%"
+          no-data-text="暂无地址，请前往地址管理添加"
+        >
+          <el-option
+            v-for="item in addressList"
+            :key="item.id"
+            :label="formatAddressForInput(item)" 
+            :value="item.id"
+            class="address-option"
+          >
+            <div class="option-content">
+              <div class="option-top">
+                <el-tag v-if="item.label" size="small" effect="plain" class="mr-2">
+                  {{ item.label }}
+                </el-tag>
+                <el-tag v-if="item.is_default" size="small" type="danger" effect="dark" class="mr-2">
+                  默认
+                </el-tag>
+                <span class="font-bold">{{ item.consignee }}</span>
+                <span class="ml-2 text-gray-500">{{ item.phone }}</span>
+              </div>
+              
+              <div class="option-bottom text-truncate">
+                {{ getFullAddress(item) }}
+              </div>
+            </div>
+          </el-option>
+        </el-select>
       </el-form-item>
-
       <el-form-item label="支付方式" prop="paymentMethod">
         <el-radio-group v-model="formData.paymentMethod">
-          <el-radio border label="wechat">
-            <span class="pay-icon"></span> 微信支付
-          </el-radio>
-          <el-radio border label="alipay">
-            <span class="pay-icon"></span> 支付宝
-          </el-radio>
+          <el-radio border label="wechat"> <span class="pay-icon"></span> 微信支付 </el-radio>
+          <el-radio border label="alipay"> <span class="pay-icon"></span> 支付宝 </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -444,11 +591,7 @@ onMounted(() => {
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          @click="submitOrder" 
-          :loading="isSubmitting"
-        >
+        <el-button type="primary" @click="submitOrder" :loading="isSubmitting">
           立即支付 ¥{{ orderInfo.totalAmount }}
         </el-button>
       </span>
@@ -464,8 +607,8 @@ onMounted(() => {
     <div class="footer-content">
       <div class="footer-left">
         <el-checkbox
-          v-model="selectAll"
-          :indeterminate="isIndeterminate"
+          v-model="store.selected"
+          :indeterminate="store.indeterminate"
           @change="handleSelectAllChange"
         >
           全选
@@ -687,6 +830,29 @@ onMounted(() => {
 
 .item-actions {
   text-align: center;
+}
+
+.option-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.option-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: #303133;
+}
+
+.option-bottom {
+  font-size: 12px;
+  color: #909399;
+  line-height: 1.4;
+  /* 超出省略号 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .empty-cart {

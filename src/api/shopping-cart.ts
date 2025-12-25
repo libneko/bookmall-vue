@@ -5,6 +5,9 @@ import type {
   ShoppingCartItem,
   BookData,
   ApiResponse,
+  Address,
+  SubmitOrder,
+  OrderPesponse,
 } from './types'
 
 export const addShoppingCartApi = (book_id: BookData): Promise<ApiResponse<object>> => {
@@ -29,4 +32,12 @@ export const deleteCartItemApi = (id: number): Promise<ApiResponse<any>> => {
 // 清空购物车
 export const clearCartApi = (): Promise<ApiResponse<any>> => {
   return request.delete('/user/shoppingCart/clean')
+}
+
+export const getAddressApi = (): Promise<ApiResponse<Address[]>> => { 
+  return request.get('/user/addressBook/list')
+}
+
+export const SubmitOrderApi = (order: SubmitOrder): Promise<ApiResponse<OrderPesponse>> => {
+  return request.post('/user/order/submit', order)
 }

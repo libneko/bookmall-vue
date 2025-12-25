@@ -1,21 +1,20 @@
 <script setup lang="ts">
-import { submitBookApi } from '@/api/book-management';
-import { getBooks } from '@/api/home';
-import { openBook } from '@/api/meta';
-import { DeleteOrderApi, OrderApi } from '@/api/order';
-import type { Book, Order } from '@/api/types';
-import { ElMessage, ElMessageBox, type CollapseModelValue } from 'element-plus';
-import type { el } from 'element-plus/es/locales.mjs';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { submitBookApi } from '@/api/book-management'
+import { getBooks } from '@/api/home'
+import { openBook } from '@/api/meta'
+import { DeleteOrderApi, OrderApi } from '@/api/order'
+import type { Book, Order } from '@/api/types'
+import { ElMessage, ElMessageBox, type CollapseModelValue } from 'element-plus'
+import type { el } from 'element-plus/es/locales.mjs'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 const dialogVisible = ref(false)
 const activeNames = ref(['0'])
 const dialogTitle = ref('') // 动态标题
 const isEditMode = ref(false) // 标记当前是否为编辑模式
 const currentPage = ref(1) // 当前页码
-const pageSize = ref(5)    // 每页显示数量 (设小一点方便看效果)
+const pageSize = ref(5) // 每页显示数量 (设小一点方便看效果)
 const searchQuery = ref('')
-
 
 const defaultBook: Book = {
   id: 0,
@@ -29,7 +28,7 @@ const defaultBook: Book = {
   category_id: '',
   publisher: '',
   description: '',
-  status: 1 ,
+  status: 1,
   update_time: '',
 }
 
@@ -44,7 +43,7 @@ const handleCoverChange = (uploadFile: any) => {
 const handleCurrentChange = (val: number) => {
   console.log(`当前页: ${val}`)
   // 可以在这里加一行代码让页面滚动回顶部
-   window.scrollTo(0, 0)
+  window.scrollTo(0, 0)
 }
 const handleSizeChange = (val: number) => {
   console.log(`每页 ${val} 条`)
@@ -60,14 +59,14 @@ const submitBook = async () => {
     // 更新表格数据
     if (isEditMode.value) {
       // 编辑模式，更新对应的表格行
-      const index = tableData.value.findIndex(item => item.id === bookForm.id)
+      const index = tableData.value.findIndex((item) => item.id === bookForm.id)
       if (index !== -1) {
         tableData.value[index] = { ...bookForm }
       }
     } else {
       // 添加模式，插入新数据到表格
       // 假设后端返回了新书籍的完整数据，包括生成的 ID
-      tableData.value.unshift({ ...bookForm, id: res.data.book_id } )
+      tableData.value.unshift({ ...bookForm, id: res.data.book_id })
     }
   } else {
     ElMessage.error(res.message || '操作失败，请稍后重试')
@@ -95,19 +94,15 @@ const editBook = (row: Book) => {
   dialogVisible.value = true
 }
 
-
 const deletebook = async (row: Book) => {
-
   ElMessageBox.confirm(`确定删除书籍《${row.name}》吗?`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
   }).then(() => {
-    tableData.value = tableData.value.filter(item => item.id !== row.id)
+    tableData.value = tableData.value.filter((item) => item.id !== row.id)
     ElMessage.success('删除成功')
   })
-
-  
 }
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value
@@ -118,14 +113,14 @@ const paginatedData = computed(() => {
 
 const filteredData = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
-  
+
   // 如果没有搜索词，直接返回所有数据
   if (!query) return tableData.value
-  
+
   // 否则根据书名、作者或ISBN筛选
-  return tableData.value.filter(item => {
+  return tableData.value.filter((item) => {
     return (
-      item.name.toLowerCase().includes(query) || 
+      item.name.toLowerCase().includes(query) ||
       item.author.toLowerCase().includes(query) ||
       item.isbn.includes(query)
     )
@@ -142,114 +137,111 @@ onMounted(async () => {
     console.log(tableData.value[0])
   }
 })
-
 </script>
-
 
 <template>
   <div class="book">
     <div class="book-header">
       <!-- <span class="selected-count">已加载??个订单</span> -->
-        <el-button type="primary" class="add" @click="handleAdd"> 添加书籍 </el-button>
+      <el-button type="primary" class="add" @click="handleAdd"> 添加书籍 </el-button>
 
-        <div class="search-area">
-          <el-input
-            v-model="searchQuery"
-            placeholder="请输入书名、作者或ISBN进行搜索..."
-            clearable
-            prefix-icon="Search"
-            style="width: 300px;" 
-          />
-        </div>
-        
-        <el-dialog
-          v-model="dialogVisible"
-          :title="isEditMode ? '编辑书籍' : '添加书籍'"
-          width="600px"
-          align-center
-        >
-          <el-form :model="bookForm" label-width="90px">
-            <el-form-item label="书本封面">
-              <el-upload
-                class="cover-uploader"
-                action="#"
-                :show-file-list="false"
-                :auto-upload="false"
-                :on-change="handleCoverChange"
-              >
-                <img v-if="bookForm.image" :src="bookForm.image" class="cover-image" />
-                <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
-              </el-upload>
-            </el-form-item>
+      <div class="search-area">
+        <el-input
+          v-model="searchQuery"
+          placeholder="请输入书名、作者或ISBN进行搜索..."
+          clearable
+          prefix-icon="Search"
+          style="width: 300px"
+        />
+      </div>
 
-            <el-form-item label="书本名">
-              <el-input v-model="bookForm.name" placeholder="请输入书名" />
-            </el-form-item>
+      <el-dialog
+        v-model="dialogVisible"
+        :title="isEditMode ? '编辑书籍' : '添加书籍'"
+        width="600px"
+        align-center
+      >
+        <el-form :model="bookForm" label-width="90px">
+          <el-form-item label="书本封面">
+            <el-upload
+              class="cover-uploader"
+              action="#"
+              :show-file-list="false"
+              :auto-upload="false"
+              :on-change="handleCoverChange"
+            >
+              <img v-if="bookForm.image" :src="bookForm.image" class="cover-image" />
+              <el-icon v-else class="cover-uploader-icon"><Plus /></el-icon>
+            </el-upload>
+          </el-form-item>
 
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="作者">
-                  <el-input v-model="bookForm.author" placeholder="作者名" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="出版社">
-                  <el-input v-model="bookForm.publisher" placeholder="出版社" />
-                </el-form-item>
-              </el-col>
-            </el-row>
+          <el-form-item label="书本名">
+            <el-input v-model="bookForm.name" placeholder="请输入书名" />
+          </el-form-item>
 
-            <el-form-item label="ISBN">
-              <el-input v-model="bookForm.isbn" placeholder="例如: 978-7-xxx" />
-            </el-form-item>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="作者">
+                <el-input v-model="bookForm.author" placeholder="作者名" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="出版社">
+                <el-input v-model="bookForm.publisher" placeholder="出版社" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="位置">
-                  <el-input v-model="bookForm.location" placeholder="例如: A-1" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="数量">
-                  <el-input-number v-model="bookForm.stock" :min="0" style="width: 100%" />
-                </el-form-item>
-              </el-col>
-            </el-row>
-            
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="分类ID">
-                  <el-input v-model="bookForm.category_id" placeholder="例如: 101" />
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="状态">
-                  <el-select v-model="bookForm.status">
-                    <el-option label="正常" value="1" />
-                    <el-option label="异常" value="0" />
+          <el-form-item label="ISBN">
+            <el-input v-model="bookForm.isbn" placeholder="例如: 978-7-xxx" />
+          </el-form-item>
 
-                  </el-select>
-                </el-form-item>
-              </el-col>
-            </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="位置">
+                <el-input v-model="bookForm.location" placeholder="例如: A-1" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="数量">
+                <el-input-number v-model="bookForm.stock" :min="0" style="width: 100%" />
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-            <el-form-item label="简介">
-              <el-input 
-                v-model="bookForm.description" 
-                type="textarea" 
-                :rows="3" 
-                placeholder="请输入简介..." 
-              />
-            </el-form-item>
-          </el-form>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="分类ID">
+                <el-input v-model="bookForm.category_id" placeholder="例如: 101" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="状态">
+                <el-select v-model="bookForm.status">
+                  <el-option label="正常" value="1" />
+                  <el-option label="异常" value="0" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-          <template #footer>
-            <span class="dialog-footer">
-              <el-button @click="dialogVisible = false">取消</el-button>
-              <el-button type="primary" @click="submitBook">提交</el-button>
-            </span>
-          </template>
-        </el-dialog>
+          <el-form-item label="简介">
+            <el-input
+              v-model="bookForm.description"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入简介..."
+            />
+          </el-form-item>
+        </el-form>
+
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="dialogVisible = false">取消</el-button>
+            <el-button type="primary" @click="submitBook">提交</el-button>
+          </span>
+        </template>
+      </el-dialog>
     </div>
 
     <el-card class="cart-container">
@@ -264,14 +256,8 @@ onMounted(async () => {
         </el-row>
       </template>
       <div class="book-items" v-if="tableData.length > 0">
-        <el-card 
-          v-for="item in paginatedData" 
-          :key="item.id" 
-          class="book-card" 
-          shadow="hover"
-        >
+        <el-card v-for="item in paginatedData" :key="item.id" class="book-card" shadow="hover">
           <el-row align="middle" type="flex">
-            
             <el-col class="book-info" :span="12">
               <el-row :gutter="10" align="middle">
                 <el-col :span="6">
@@ -303,16 +289,17 @@ onMounted(async () => {
               </el-tag>
             </el-col>
 
-            <el-col class="book-opera" :span="3" style="text-align: right;">
-              <el-button type="primary" class ="button" @click="openBook(item.id)">书籍详情</el-button>
-              <el-button type="primary" class ="button" @click="editBook(item)">编辑书籍</el-button>
-              <el-button type="danger" class ="button" @click="deletebook(item)">删除书籍</el-button>
+            <el-col class="book-opera" :span="3" style="text-align: right">
+              <el-button type="primary" class="button" @click="openBook(item.id)"
+                >书籍详情</el-button
+              >
+              <el-button type="primary" class="button" @click="editBook(item)">编辑书籍</el-button>
+              <el-button type="danger" class="button" @click="deletebook(item)">删除书籍</el-button>
             </el-col>
 
             <el-col class="book-time" :span="5">
               {{ item.update_time }}
             </el-col>
-
           </el-row>
         </el-card>
 
@@ -322,9 +309,7 @@ onMounted(async () => {
             v-model:page-size="pageSize"
             :page-sizes="[5, 10, 20]"
             layout="total, sizes, prev, pager, next, jumper"
-            
-            :total="filteredData.length" 
-            
+            :total="filteredData.length"
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             background
@@ -347,26 +332,26 @@ onMounted(async () => {
   margin-bottom: 100px;
   padding-bottom: 20px;
 }
-.head-label{
+.head-label {
   text-align: center;
   font-weight: bold;
 }
-.book-header{
+.book-header {
   margin-bottom: 20px;
 }
-.book-status , .book-time{
+.book-status,
+.book-time {
   text-align: center;
 }
 
-.add{
+.add {
   margin-bottom: 10px;
-  
 }
 .card-list-container {
   padding: 20px;
 }
 
-.button{
+.button {
   margin-left: 12px;
   margin-right: 15px;
   margin-bottom: 12px;
@@ -384,7 +369,7 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-.cover-uploader{
+.cover-uploader {
   border: 1px dashed var(--el-border-color);
   border-radius: 6px;
   cursor: pointer;
@@ -392,24 +377,24 @@ onMounted(async () => {
   overflow: hidden;
   transition: var(--el-transition-duration-fast);
 }
-:deep(.el-upload){
+:deep(.el-upload) {
   border: 1px dashed var(--el-border-color);
   border-radius: 6px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: var(--el-transition-duration-fast);  
+  transition: var(--el-transition-duration-fast);
 }
-.cover-uploader  {
+.cover-uploader {
   border-color: var(--el-color-primary);
 }
-:deep(.el-upload:hover){
+:deep(.el-upload:hover) {
   border-color: var(--el-color-primary);
 }
 .cover-uploader-icon {
   font-size: 28px;
   color: #8c939d;
-  width: 100px;  /* 封面图宽 */
+  width: 100px; /* 封面图宽 */
   height: 140px; /* 封面图高，模拟书本比例 */
   line-height: 140px;
   text-align: center;
@@ -425,14 +410,15 @@ onMounted(async () => {
   white-space: nowrap;
 }
 
-
 .info-label {
   font-size: 12px;
   color: #909399;
   margin-bottom: 4px;
 }
 
-.book-author, .book-isbn ,.book-publisher {
+.book-author,
+.book-isbn,
+.book-publisher {
   font-size: 13px;
   color: #909399;
   margin-bottom: 4px;

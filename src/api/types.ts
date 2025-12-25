@@ -88,6 +88,7 @@ export interface ShoppingCartItem {
   amount: number // 金额
   image: string
   create_time: string
+  selected:boolean
 }
 
 //更新购物车
@@ -102,14 +103,10 @@ export interface ShoppingDeleteForm {
 }
 
 export interface SendOrder{
-  addressBookId: number
-  payMethod: number
-  estimatedDeliveryTime: string
-  shippingFee: number
-  amount: number
+  page: string
+  pageSize: string
+  status: string
 }
-
-
 export interface SendPersonId {
   user_id: number
 }
@@ -127,6 +124,7 @@ export interface Product extends Book {
   freeShipping: boolean
   guarantee: boolean
   stock: number
+  cartId: number
 }
 
 // 定义店铺类型
@@ -148,26 +146,91 @@ export interface User {
   avatar: string
 }
 
-export interface items{
+export interface items {
   book_id: number
   title: string
   quantity: number
   price: number
 }
 
-export interface Order{
-  order_id: string
-  books:items[]
-  total_price: number
+export interface Order {
+  id: number
+  number:string
   status: number
-  address: string
-  create_time:string
-  
+  userId: number
+  addressBookId: number
+  orderTime: string
+  checkoutTime: string
+  payMethod: number
+  payStatus: number
+  amount: number
+  userName: string
+  phone: string
+  consignee: string
+  cancelTime: string
+  estimatedDeliveryTime: string
+  deliverTime: string
+  shippingFee: number
+  orderBooks: string
+  orderDetailList: OrderDetail[]
 }
 
-export interface Notice{
-  id:string
-  content:string
-  status:number
-  create_time:string
+export interface OrderDetail{
+  id: number
+  name: string
+  orderId: number
+  bookId: number
+  number: number
+  amount: number
+  image: string
+  
+}
+export interface GetOrders{
+  total: number
+  order: Order[]
+}
+
+
+export interface Notice {
+  id: string
+  content: string
+  status: number
+  create_time: string
+}
+
+export interface PayInfo{
+  orderNumber: string
+  payMethod: number
+}
+
+export interface Address{
+  id: number
+  userId: number
+  consignee: string
+  phone: string
+  sex: number
+  province_code: string
+  province_name: string
+  city_code: string  
+  city_name: string
+  district_code: string
+  district_name: string
+  detail: string
+  label: string
+  is_default: boolean
+}
+
+export interface SubmitOrder{
+  addressBookId: number
+  payMethod: number
+  estimatedDeliveryTime: string
+  shippingFee: number
+  amount: number
+}
+
+export interface OrderPesponse{
+  id: number
+  orderNumber: string
+  orderAmount: number
+  orderTime: string
 }

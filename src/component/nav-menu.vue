@@ -9,14 +9,17 @@ defineEmits(['menu-click'])
       <span>小书架</span>
     </div>
     <div class="menu_item">
-      <el-menu-item index="/" @click="$emit('menu-click')">
+      <el-menu-item index="/">
         <el-icon><Promotion /></el-icon> 首页
       </el-menu-item>
-      <el-menu-item index="/search" @click="$emit('menu-click')">
+      <el-menu-item index="/search">
         <el-icon><Search /></el-icon> 搜索
       </el-menu-item>
-      <el-menu-item index="/shopping-cart" @click="$emit('menu-click')">
-        <el-icon><ShoppingCart /></el-icon> 购物车
+      <el-menu-item index="/shopping-cart">
+        <el-icon><ShoppingCart /></el-icon> 借阅车
+      </el-menu-item>
+      <el-menu-item index="/order">
+        <el-icon><Document /></el-icon> 订单管理
       </el-menu-item>
     </div>
   </el-menu>

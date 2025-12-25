@@ -24,27 +24,37 @@ const combinedFormData = computed(() => ({
   ...passwordForm,
 }))
 
-const rules = reactive<FormRules>({
-  // 1. 使用邮箱校验
-  email: [{ required: true, validator: validateEmail, trigger: 'blur' }],
+const rules = computed<FormRules>(() => {
+  return {
+    // 1. 邮箱：只有点击了编辑邮箱(isEmailEditing为真)才校验，否则为空数组(不校验)
+    email: isEmailEditing.value
+      ? [{ required: true, validator: validateEmail, trigger: 'blur' }]
+      : [],
 
-  // 2. 使用手机号校验
-  phone: [{ required: true, validator: validatePhone, trigger: 'blur' }],
+    // 2. 手机号：只有点击了编辑手机号才校验
+    phone: isPhoneEditing.value
+      ? [{ required: true, validator: validatePhone, trigger: 'blur' }]
+      : [],
 
-  // 3. 密码 (通常只需要校验长度)
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' },
-  ],
+    // 3. 密码：只有点击了编辑密码才校验
+    password: isPasswordEditing.value
+      ? [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' },
+        ]
+      : [],
 
-  // 4. 确认密码 (使用工厂函数，传入获取当前密码的方法)
-  confirmPassword: [
-    {
-      required: true,
-      validator: createConfirmPasswordValidator(() => passwordForm.password),
-      trigger: 'blur',
-    },
-  ],
+    // 4. 确认密码：跟随密码编辑状态
+    confirmPassword: isPasswordEditing.value
+      ? [
+          {
+            required: true,
+            validator: createConfirmPasswordValidator(() => passwordForm.password),
+            trigger: 'blur',
+          },
+        ]
+      : [],
+  }
 })
 const isPhoneEditing = ref(false)
 const isEmailEditing = ref(false)
@@ -83,6 +93,7 @@ const handleFileChange = async (event: Event) => {
     alert('图片大小不能超过 2MB!')
     return
   }
+  form.avatar = URL.createObjectURL(file)
   target.value = ''
 }
 
@@ -100,11 +111,16 @@ const uploadToServer = async (file: File) => {
   }
 }
 const isChanged = computed(() => {
-  // 如果原始数据还没加载好，认为没有变化
-  if (!originalFormStr.value) return false
-  
-  // 将当前的 form 转为字符串，与原始字符串对比
-  return JSON.stringify(form) !== originalFormStr.value
+  // 1. 判断基础信息是否有变动 (对比当前 form 和 原始 form 字符串)
+  const isProfileChanged = JSON.stringify(form) !== originalFormStr.value
+
+  // 2. 判断密码是否有变动
+  // 逻辑：如果处于“正在编辑密码”状态，且密码输入框不为空，则认为有修改
+  const isPasswordChanged =
+    isPasswordEditing.value && passwordForm.password && passwordForm.password.trim() !== ''
+
+  // 3. 只要满足其中任意一种情况，按钮就应该亮起
+  return isProfileChanged || isPasswordChanged
 })
 onMounted(async () => {
   const loginUserStr = localStorage.getItem('login_user')
@@ -145,7 +161,6 @@ const submit = async () => {
     await save()
     originalFormStr.value = JSON.stringify(form)
     ElMessage.success('保存修改成功')
-
   } catch (error) {
     ElMessage.error('请检查输入的数据是否正确')
   }
@@ -154,10 +169,10 @@ const submit = async () => {
 const save = async () => {
   try {
     form.password = passwordForm.password
-    const res = await updateProfile(form)
     if (selectedFile.value) {
       await uploadToServer(selectedFile.value)
     }
+    const res = await updateProfile(form)
     if (res.code === 1) {
       ElMessage.success('用户信息已更新，页面即将刷新')
       setTimeout(() => {
@@ -259,7 +274,9 @@ const save = async () => {
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="submit" :disabled="!isChanged" class="save-btn">保存修改</el-button>
+          <el-button type="primary" @click="submit" :disabled="!isChanged" class="save-btn"
+            >保存修改</el-button
+          >
         </el-form-item>
       </el-form>
     </el-card>
