@@ -203,15 +203,16 @@ export interface PayInfo{
   payMethod: number
 }
 
-export interface Address{
+// 地址管理相关类型
+export interface AddressBook {
   id: number
-  userId: number
+  user_id: number
   consignee: string
   phone: string
   sex: number
   province_code: string
   province_name: string
-  city_code: string  
+  city_code: string
   city_name: string
   district_code: string
   district_name: string
