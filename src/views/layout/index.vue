@@ -50,6 +50,11 @@ const profile = () => {
   window.open('/profile', '_blank')
 }
 
+//地址管理界面
+const addressManagement = () => {
+  window.open('/address', '_blank')
+}
+
 // 外观子菜单逻辑
 const isAppearanceOpen = ref(false)
 const currentTheme = ref<Theme>((localStorage.getItem('theme') as Theme) || Theme.SYSTEM)
@@ -127,6 +132,7 @@ onUnmounted(() => {
                 </div>
               </div>
               <div class="dropdown-item" @click="profile">个人信息</div>
+              <div class="dropdown-item" @click="addressManagement">地址管理</div>
               <div
                 class="dropdown-item appearance-item"
                 @mouseenter="isAppearanceOpen = true"

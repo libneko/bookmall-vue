@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted,reactive } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   getShoppingCartApi,
@@ -20,21 +20,19 @@ const orderFormRef = ref<FormInstance>()
 
 const formData = reactive({
   address: '',
-  paymentMethod: 'wechat' // 默认选中微信
+  paymentMethod: 'wechat', // 默认选中微信
 })
 const orderInfo = reactive({
   estimatedTime: '2025-12-20 14:00 之前',
-  shippingFee: 12.00,
-  totalAmount: 299.00
+  shippingFee: 12.0,
+  totalAmount: 299.0,
 })
 const rules = reactive<FormRules>({
   address: [
     { required: true, message: '请填写收货地址', trigger: 'blur' },
-    { min: 5, message: '地址长度不能少于5个字符', trigger: 'blur' }
+    { min: 5, message: '地址长度不能少于5个字符', trigger: 'blur' },
   ],
-  paymentMethod: [
-    { required: true, message: '请选择支付方式', trigger: 'change' }
-  ]
+  paymentMethod: [{ required: true, message: '请选择支付方式', trigger: 'change' }],
 })
 
 // 店铺数据类型定义
@@ -246,28 +244,27 @@ const handleCheckout = () => {
     return
   }
   dialogVisible.value = true
-  orderInfo.totalAmount= totalPrice.value + orderInfo.shippingFee
-
+  orderInfo.totalAmount = totalPrice.value + orderInfo.shippingFee
 }
 const submitOrder = async () => {
   if (!orderFormRef.value) return
-  
+
   // 1. 校验表单
   await orderFormRef.value.validate((valid) => {
     if (valid) {
       isSubmitting.value = true // 开启加载状态
-      
+
       // 2. 模拟调用后端 API
       setTimeout(() => {
         console.log('提交的数据:', {
           ...formData,
-          finalAmount: orderInfo.totalAmount
+          finalAmount: orderInfo.totalAmount,
         })
-        
+
         ElMessage.success('订单创建成功，正在跳转支付...')
         isSubmitting.value = false
         dialogVisible.value = false
-        
+
         // 此处可以添加跳转逻辑
       }, 1500)
     } else {
@@ -310,7 +307,6 @@ onMounted(() => {
           <el-col class="head-label" :span="3">操作</el-col>
         </el-row>
       </template>
-
 
       <!-- 店铺商品列表 -->
       <div class="store-items">
@@ -401,9 +397,7 @@ onMounted(() => {
       <el-descriptions-item label="预计到达时间">
         <el-tag type="info">{{ orderInfo.estimatedTime }}</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="商品邮费">
-        ¥{{ orderInfo.shippingFee }}
-      </el-descriptions-item>
+      <el-descriptions-item label="商品邮费"> ¥{{ orderInfo.shippingFee }} </el-descriptions-item>
       <el-descriptions-item label="应付总金额">
         <span class="total-price">¥{{ orderInfo.totalAmount }}</span>
       </el-descriptions-item>
@@ -431,12 +425,8 @@ onMounted(() => {
 
       <el-form-item label="支付方式" prop="paymentMethod">
         <el-radio-group v-model="formData.paymentMethod">
-          <el-radio border label="wechat">
-            <span class="pay-icon"></span> 微信支付
-          </el-radio>
-          <el-radio border label="alipay">
-            <span class="pay-icon"></span> 支付宝
-          </el-radio>
+          <el-radio border label="wechat"> <span class="pay-icon"></span> 微信支付 </el-radio>
+          <el-radio border label="alipay"> <span class="pay-icon"></span> 支付宝 </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -444,11 +434,7 @@ onMounted(() => {
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          @click="submitOrder" 
-          :loading="isSubmitting"
-        >
+        <el-button type="primary" @click="submitOrder" :loading="isSubmitting">
           立即支付 ¥{{ orderInfo.totalAmount }}
         </el-button>
       </span>

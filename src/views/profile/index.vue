@@ -102,7 +102,7 @@ const uploadToServer = async (file: File) => {
 const isChanged = computed(() => {
   // 如果原始数据还没加载好，认为没有变化
   if (!originalFormStr.value) return false
-  
+
   // 将当前的 form 转为字符串，与原始字符串对比
   return JSON.stringify(form) !== originalFormStr.value
 })
@@ -145,7 +145,6 @@ const submit = async () => {
     await save()
     originalFormStr.value = JSON.stringify(form)
     ElMessage.success('保存修改成功')
-
   } catch (error) {
     ElMessage.error('请检查输入的数据是否正确')
   }
@@ -259,7 +258,9 @@ const save = async () => {
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" @click="submit" :disabled="!isChanged" class="save-btn">保存修改</el-button>
+          <el-button type="primary" @click="submit" :disabled="!isChanged" class="save-btn"
+            >保存修改</el-button
+          >
         </el-form-item>
       </el-form>
     </el-card>

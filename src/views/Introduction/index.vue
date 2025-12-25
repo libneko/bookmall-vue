@@ -14,9 +14,6 @@ let shopp = ref<BookData>({
 })
 let book_id: number
 
-
-
-
 const num = ref(1)
 
 onMounted(async () => {
@@ -66,7 +63,7 @@ const handleChange = (value: number | undefined) => {
               <p>作者: {{ book?.author }}</p>
               <p>IBNS: {{ book?.isbn }}</p>
               <p>图书位置: {{ book?.location }}</p>
-              <p>出版社: {{ book?.publisher }} </p>
+              <p>出版社: {{ book?.publisher }}</p>
             </div>
           </div>
           <div class="books-col1-row2">

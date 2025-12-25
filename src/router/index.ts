@@ -12,7 +12,7 @@ import OrderView from '@/views/order/index.vue'
 import BookManagementView from '@/views/book-management/index.vue'
 import UserManagementView from '@/views/user-management/index.vue'
 import NoticeView from '@/views/notice/index.vue'
-
+import AddressManagementView from '@/views/address/index.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -60,7 +60,7 @@ const router = createRouter({
         {
           path: '/book-management',
           name: 'book-management',
-          component:  BookManagementView,
+          component: BookManagementView,
           meta: { title: '图书管理' },
         },
         {
@@ -74,7 +74,13 @@ const router = createRouter({
           name: 'notice',
           component: NoticeView,
           meta: { title: '通知' },
-        }
+        },
+        {
+          path: '/address',
+          name: 'address',
+          component: AddressManagementView,
+          meta: { title: '地址管理' },
+        },
       ],
     },
     { path: '/login', name: 'login', component: LoginView },

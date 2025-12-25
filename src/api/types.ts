@@ -101,14 +101,13 @@ export interface ShoppingDeleteForm {
   id: number
 }
 
-export interface SendOrder{
+export interface SendOrder {
   addressBookId: number
   payMethod: number
   estimatedDeliveryTime: string
   shippingFee: number
   amount: number
 }
-
 
 export interface SendPersonId {
   user_id: number
@@ -148,26 +147,43 @@ export interface User {
   avatar: string
 }
 
-export interface items{
+export interface items {
   book_id: number
   title: string
   quantity: number
   price: number
 }
 
-export interface Order{
+export interface Order {
   order_id: string
-  books:items[]
+  books: items[]
   total_price: number
   status: number
   address: string
-  create_time:string
-  
+  create_time: string
 }
 
-export interface Notice{
-  id:string
-  content:string
-  status:number
-  create_time:string
+export interface Notice {
+  id: string
+  content: string
+  status: number
+  create_time: string
+}
+
+// 地址管理相关类型
+export interface AddressBook {
+  id: number
+  user_id: number
+  consignee: string
+  phone: string
+  sex: number
+  province_code: string
+  province_name: string
+  city_code: string
+  city_name: string
+  district_code: string
+  district_name: string
+  detail: string
+  label: string
+  is_default: boolean
 }
