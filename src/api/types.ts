@@ -222,10 +222,10 @@ export interface AddressBook {
 }
 
 export interface SubmitOrder{
-  addressBookId: number
-  payMethod: number
-  estimatedDeliveryTime: string
-  shippingFee: number
+  address_book_id: number
+  pay_method: number
+  estimated_delivery_time: string
+  shipping_fee: number
   amount: number
 }
 

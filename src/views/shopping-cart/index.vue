@@ -9,10 +9,11 @@ import {
   SubmitOrderApi,
   getAddressApi,
 } from '@/api/shopping-cart'
-import type { Address, ApiResponse, Product, SubmitOrder, ShoppingCartItem, Store } from '@/api/types'
+import type { AddressBook, ApiResponse, Product, SubmitOrder, ShoppingCartItem, Store } from '@/api/types'
 import { bookApi } from '@/api/introduction'
 import { openBook } from '@/api/meta'
 import router from '@/router'
+import { Temporal } from '@js-temporal/polyfill'
 
 // 加载状态
 const loading = ref(false)
@@ -29,7 +30,7 @@ const formData = reactive({
 })
 
 const orderInfo = reactive({
-  estimatedTime: '2025-12-20 14:00 之前',
+  estimatedTime: '',
   shippingFee: 12.0,
   totalAmount: 299.0,
 })
@@ -41,59 +42,9 @@ const rules = reactive<FormRules>({
   paymentMethod: [{ required: true, message: '请选择支付方式', trigger: 'change' }],
 })
 
-const addressList = ref<Address[]>([])
+const addressList = ref<AddressBook[]>([])
 
 const initMockData = () => {
-  addressList.value = [
-    {
-      id: 1,
-      userId: 1001,
-      consignee: '王小虎',
-      phone: '13800138000',
-      sex: 1,
-      province_code: '110000',
-      province_name: '北京市',
-      city_code: '110100',
-      city_name: '北京市',
-      district_code: '110105',
-      district_name: '朝阳区',
-      detail: '建国路88号SOHO现代城A座',
-      label: '公司',
-      is_default: true
-    },
-    {
-      id: 2,
-      userId: 1001,
-      consignee: '林黛玉',
-      phone: '13900009999',
-      sex: 0,
-      province_code: '320000',
-      province_name: '江苏省',
-      city_code: '320500',
-      city_name: '苏州市',
-      district_code: '320508',
-      district_name: '姑苏区',
-      detail: '桃花坞街道12号',
-      label: '家',
-      is_default: false
-    },
-    {
-      id: 3,
-      userId: 1001,
-      consignee: '贾宝玉',
-      phone: '13666666666',
-      sex: 1,
-      province_code: '440000',
-      province_name: '广东省',
-      city_code: '440300',
-      city_name: '深圳市',
-      district_code: '440305',
-      district_name: '南山区',
-      detail: '粤海街道科技园南区TCL大厦',
-      label: '', // 测试没有标签的情况
-      is_default: false
-    }
-  ]
 // 自动选中默认地址
   const defaultAddr = addressList.value.find(addr => addr.is_default)
   if (defaultAddr) {
@@ -101,11 +52,11 @@ const initMockData = () => {
   }
 }
 
-const getFullAddress = (item: Address) => {
+const getFullAddress = (item: AddressBook) => {
   // 拼接省市区+详细地址
   return `${item.province_name}${item.city_name}${item.district_name} ${item.detail}`
 }
-const formatAddressForInput = (item: Address) => {
+const formatAddressForInput = (item: AddressBook) => {
   return `${item.consignee} ${item.phone} - ${item.district_name} ${item.detail}`
 }
 
@@ -363,6 +314,13 @@ const handleCheckout = () => {
     ElMessage.warning('请选择要结算的商品')
     return
   }
+
+  const now = Temporal.Now
+              .plainDateTimeISO()
+              .toString({ smallestUnit: "second" })
+              .replace("T", " ")
+  orderInfo.estimatedTime = now.toString()
+  console.log(orderInfo.estimatedTime)
   dialogVisible.value = true
   orderInfo.totalAmount = totalPrice.value + orderInfo.shippingFee
 }
@@ -378,13 +336,13 @@ const submitOrder = async () => {
         'alipay': 2
       }
       const requestData: SubmitOrder = {
-        addressBookId: formData.addressId!, // 使用 ! 断言，因为通过 validate 校验后一定不为空
-        payMethod: payMethodMap[formData.paymentMethod] ?? 1, 
-        estimatedDeliveryTime: orderInfo.estimatedTime,
-        shippingFee: orderInfo.shippingFee,
+        address_book_id: formData.addressId!, // 使用 ! 断言，因为通过 validate 校验后一定不为空
+        pay_method: payMethodMap[formData.paymentMethod] ?? 1, 
+        estimated_delivery_time: orderInfo.estimatedTime,
+        shipping_fee: orderInfo.shippingFee,
         amount: orderInfo.totalAmount
       }
-
+      console.log('提交订单数据:', requestData)
       const res = await SubmitOrderApi(requestData)
       if (res.code === 1) {
 
@@ -412,6 +370,7 @@ onMounted(() => {
   console.log('购物车组件已加载')
   // 从后端API获取数据
   initMockData()
+  fetchAddressData()
   fetchShoppingCartData()
 })
 </script>

@@ -5,7 +5,7 @@ import type {
   ShoppingCartItem,
   BookData,
   ApiResponse,
-  Address,
+  AddressBook,
   SubmitOrder,
   OrderPesponse,
 } from './types'
@@ -34,7 +34,7 @@ export const clearCartApi = (): Promise<ApiResponse<any>> => {
   return request.delete('/user/shoppingCart/clean')
 }
 
-export const getAddressApi = (): Promise<ApiResponse<Address[]>> => { 
+export const getAddressApi = (): Promise<ApiResponse<AddressBook[]>> => { 
   return request.get('/user/addressBook/list')
 }
 
