@@ -62,7 +62,7 @@ const handleChange = (value: number | undefined) => {
             <div class="books-auth">
               <p>作者: {{ book?.author }}</p>
               <p>IBNS: {{ book?.isbn }}</p>
-              <p>图书位置: {{ book?.location }}</p>
+              <!-- <p>图书位置: {{ book?.location }}</p> -->
               <p>出版社: {{ book?.publisher }}</p>
             </div>
           </div>

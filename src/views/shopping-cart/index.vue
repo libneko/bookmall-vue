@@ -488,7 +488,7 @@ onMounted(() => {
     :close-on-click-modal="false"
   >
     <el-descriptions :column="1" border class="mb-4">
-      <el-descriptions-item label="预计到达时间">
+      <el-descriptions-item label="下单时间">
         <el-tag type="info">{{ orderInfo.estimatedTime }}</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="商品邮费"> ¥{{ orderInfo.shippingFee }} </el-descriptions-item>
