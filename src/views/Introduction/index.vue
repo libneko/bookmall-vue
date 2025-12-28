@@ -11,6 +11,7 @@ let book = ref<Book>()
 
 let shopp = ref<BookData>({
   book_id: 0,
+  number: 1
 })
 let book_id: number
 
@@ -24,9 +25,9 @@ onMounted(async () => {
   shopp.value.book_id = book_id
 })
 
-const addShopping = async (book_id: BookData) => {
-  console.log(book_id)
-  const res = await addShoppingCartApi(book_id)
+const addShopping = async (book: BookData) => {
+  console.log(book)
+  const res = await addShoppingCartApi(book)
   console.log(res)
   // 成功提示
   if (res.code !== 0) {
@@ -37,8 +38,9 @@ const addShopping = async (book_id: BookData) => {
   }
 }
 
-const handleChange = (value: number | undefined) => {
+const handleChange = (value: number) => {
   console.log(value)
+  shopp.value.number = value
 }
 </script>
 

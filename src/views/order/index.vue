@@ -26,7 +26,7 @@ const handleChange = (val: CollapseModelValue) => {
 
 const handleCurrentChange = (val: number) => {
   console.log(`当前页: ${val}`)
-  // 可以在这里加一行代码让页面滚动回顶部
+  currentPage.value = val
   fetchOrders() // 重新向后端拿数据
   window.scrollTo(0, 0)
 }
@@ -54,7 +54,7 @@ const open_order = (orderId: number) => {
   }
 }
 const formatStatus = (status: number) => {
-  // 尝试从 Map 中获取，如果获取不到（比如后端传了个 999），则返回默认对象
+
   return OrderStatusMap[status] || { label: '未知状态', type: 'info' };
 };
 const updateOrderStatus = (order: Order, targetStatus: number) => {
@@ -73,18 +73,10 @@ const updateOrderStatus = (order: Order, targetStatus: number) => {
     }
   )
     .then(async () => {
-      // 2. 模拟调用后端接口成功
-      // 在这里发送 axios 请求，例如: await api.shipOrder(order.id)
       console.log(targetConfig)
       const res = await CompleteOrderApi(String(order.id));
       console.log(res)
-   
-      // 3. 更新本地视图数据
-
-      // 4. 如果是发货，通常会更新发货时间
-/*       if (targetStatus === 3) {
-        order.deliverTime = new Date().toLocaleString().replace(/\//g, "-"); 
-      } */
+  
       if (res.code === 1) {
         ElMessage.success(`订单已成功${actionName}`);
         order.status = targetStatus;
@@ -98,8 +90,8 @@ const updateOrderStatus = (order: Order, targetStatus: number) => {
     });
 };
 const confirmPayment = async () => {
-  // 实际开发中，这里通常是轮询查询后端支付状态，或者用户点击“我已支付”后刷新列表
-  // 这里模拟支付成功
+
+
   const res = await payOrderApi({
     order_number: payingOrder.value?.number || '',
     payMethod: payType.value
@@ -108,8 +100,8 @@ const confirmPayment = async () => {
 
   if (res.code === 1) {
     setTimeout(async () => {
-      // 模拟后端处理时间
-      await fetchOrders(); // 刷新订单列表
+
+      await fetchOrders(); 
     }, 500);
     ElMessage.success(`订单 ${payingOrder.value?.number} 支付成功！`);
     payDialogVisible.value = false;
@@ -163,7 +155,7 @@ const reminder_order = async (id: number) => {
 
 const fetchOrders = async() => {
   const params: SendOrder = {
-    page: 1,
+    page: currentPage.value,
     pageSize: pageSize.value,
     status:null
   }
@@ -188,7 +180,7 @@ watch(searchQuery, () => {
   timer = setTimeout(() => {
     currentPage.value = 1
     fetchOrders()
-  }, 500) // 用户停止输入 500ms 后才发请求
+  }, 500)
 })
 
 onMounted(async () => {
@@ -299,7 +291,7 @@ onMounted(async () => {
               </el-button>
               <el-button 
                 type="danger" 
-                :disabled="order.status === OrderStatus.CANCELLED"
+                :disabled="order.status === OrderStatus.CANCELLED || order.status === OrderStatus.COMPLETED"
                 @click="delete_order(order)"
                 class = "button" 
               >

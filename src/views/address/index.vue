@@ -396,11 +396,6 @@ onMounted(() => {
   <div class="address-management">
     <!-- 页面头部 -->
     <div class="page-header">
-      <el-button @click="goBack" class="back-btn" link>
-        <el-icon><ArrowLeft /></el-icon>
-        返回
-      </el-button>
-      <h2 class="page-title">地址管理</h2>
       <el-button type="primary" @click="openAddDialog" class="add-btn">
         <el-icon><Plus /></el-icon>
         添加新地址
@@ -580,9 +575,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.back-btn {
-  color: var(--el-text-color-secondary);
-}
 
 .add-btn {
   background-color: var(--el-color-primary);

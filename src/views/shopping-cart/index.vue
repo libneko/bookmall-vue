@@ -14,6 +14,7 @@ import { bookApi } from '@/api/introduction'
 import { openBook } from '@/api/meta'
 import router from '@/router'
 import { Temporal } from '@js-temporal/polyfill'
+import { getProfile } from '@/api/profile'
 
 // 加载状态
 const loading = ref(false)
@@ -21,6 +22,7 @@ const dialogVisible = ref(false)
 const isSubmitting = ref(false)
 const orderFormRef = ref<FormInstance>()
 const itemTimers = new Map<number, any>()
+const ischeck = ref(0)
 // 2. 用于存储全选操作的计时器
 let selectAllTimer: any = null
 
@@ -120,7 +122,7 @@ const fetchAddressData = async () => {
     addressList.value=res.data
   }
   else {
-    
+    ElMessage.error('地址获取失败')
   }
   
 }
@@ -308,12 +310,44 @@ const clearCart = async () => {
   }
 }
 
+const checkProfile = async ()=>{
+  const loginUserStr = localStorage.getItem('login_user')
+  if (loginUserStr) {
+    const loginUser = JSON.parse(loginUserStr)
+    if (loginUser && loginUser.id) {
+      try {
+        const res = await getProfile(loginUser.id)
+        console.log(res)
+        if (res.code === 1) {
+          if (res.data.phone === null) {
+            ElMessage.error('您的个人信息不完整，请先完善个人信息')
+          }
+          else {
+            ischeck.value = 1
+          }
+        } else {
+          ElMessage.error(res.message || '获取用户信息失败')
+          
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+
+}
+
 // 方法 - 处理结算
-const handleCheckout = () => {
+const handleCheckout = async () => {
   if (selectedCount.value === 0) {
     ElMessage.warning('请选择要结算的商品')
     return
   }
+  await checkProfile()
+  if (ischeck.value !== 1) {
+    return
+  }
+
 
   const now = Temporal.Now
               .plainDateTimeISO()
@@ -345,10 +379,11 @@ const submitOrder = async () => {
       console.log('提交订单数据:', requestData)
       const res = await SubmitOrderApi(requestData)
       if (res.code === 1) {
-
         setTimeout(() => {
           isSubmitting.value = false
           dialogVisible.value = false
+          location.reload()
+          
           // 此处可以添加跳转逻辑
         }, 1500)
         ElMessage.success('订单提交成功，请在订单管理支付')
@@ -368,7 +403,6 @@ const submitOrder = async () => {
 // 生命周期
 onMounted(() => {
   console.log('购物车组件已加载')
-  // 从后端API获取数据
   initMockData()
   fetchAddressData()
   fetchShoppingCartData()

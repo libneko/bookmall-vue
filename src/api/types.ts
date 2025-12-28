@@ -63,6 +63,7 @@ export interface Category {
 
 export interface BookData {
   book_id: number
+  number: number
 }
 
 export interface ReceiveSearch {
