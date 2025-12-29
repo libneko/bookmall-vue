@@ -11,7 +11,7 @@ let book = ref<Book>()
 
 let shopp = ref<BookData>({
   book_id: 0,
-  number: 1
+  number: 1,
 })
 let book_id: number
 
@@ -81,12 +81,7 @@ const handleChange = (value: number) => {
             <p>{{ book?.description }}</p>
           </div>
           <div class="books-buy">
-            <el-input-number
-              v-model="num"
-              :min="1"
-              :max="book?.stock"
-              @change="handleChange"
-            />
+            <el-input-number v-model="num" :min="1" :max="book?.stock" @change="handleChange" />
             <el-button type="primary" @click="addShopping(shopp)">加入借阅车</el-button>
           </div>
         </div>

@@ -1,27 +1,76 @@
 <script setup lang="ts">
 import type { RegisterForm } from '@/api/types'
 import { ElMessage } from 'element-plus'
-import { reactive, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import type { FormRules, FormInstance } from 'element-plus'
 import { registerApi } from '@/api/register'
 import AuthLayout from '@/component/auth-layout.vue'
+import {
+  createConfirmPasswordValidator,
+  isValidEmail,
+  validateEmail,
+  validatePhone,
+} from '@/api/meta'
+import { sendCodeApi, sendEmailApi } from '@/api/login'
 
 const registerForm = ref<RegisterForm>({
   email: '',
   password: '',
   username: '',
+  code: '',
 })
+const getInstance = (instance: any) => {
+  console.log(instance)
+  captcha.value = instance
+}
 
+const captcha = ref<any>(null)
 const router = useRouter()
-
+const countdown = ref(0)
 const formRef = ref<FormInstance>()
+const captchaButton = ref<HTMLElement | null>(null)
+let timer: number | undefined
 
 const passwordForm = reactive({
   password: '',
   confirmPassword: '',
 })
-
+const sendCode = async () => {
+  const email = registerForm.value.email.trim()
+  if (!isValidEmail(email)) {
+    ElMessage.warning('请输入正确的邮箱地址')
+    return
+  }
+  captchaButton.value?.click()
+}
+const captchaVerifyCallback = async (captchaVerifyParam: any) => {
+  const res = await sendCodeApi(captchaVerifyParam)
+  if (res.code === 1) {
+    await sendEmailApi(registerForm.value.email.trim())
+    ElMessage.success('校验成功，已发送邮箱验证')
+    startCountdown(60)
+  } else {
+    ElMessage.error('校验失败，重新校验')
+  }
+  return {
+    captchaResult: true,
+    bizResult: true,
+  }
+}
+const startCountdown = (sec: number) => {
+  countdown.value = sec
+  if (timer) window.clearInterval(timer)
+  timer = window.setInterval(() => {
+    if (countdown.value <= 1) {
+      window.clearInterval(timer)
+      timer = undefined
+      countdown.value = 0
+    } else {
+      countdown.value--
+    }
+  }, 1000)
+}
 const register = async () => {
   // 注册
   console.log(registerForm.value)
@@ -37,21 +86,6 @@ const register = async () => {
   }
 }
 
-// 自定义校验器：检查两次密码是否一致
-const validateConfirmPassword = (rule: any, value: string, callback: any) => {
-  if (!value) {
-    callback(new Error('请再次输入密码'))
-  } else if (value.length < 8) {
-    callback(new Error('密码长度不能少于8位'))
-  } else if (value.length > 20) {
-    callback(new Error('密码长度不能超过20位'))
-  } else if (value !== passwordForm.password) {
-    callback(new Error('两次输入的密码不一致'))
-  } else {
-    callback()
-  }
-}
-
 const submit = () => {
   formRef.value?.validate((valid) => {
     if (valid) {
@@ -59,13 +93,54 @@ const submit = () => {
       console.log(registerForm.value.email)
       registerForm.value.password = passwordForm.password
       register()
+    } else {
+      ElMessage.error('填写数据有误，请按照提示重新填写')
     }
   })
 }
 
-const rules = reactive<FormRules>({
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-  confirmPassword: [{ validator: validateConfirmPassword, trigger: 'blur' }],
+const rules = computed<FormRules>(() => {
+  return {
+    password: [
+      { required: true, message: '请输入密码', trigger: 'blur' },
+      { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' },
+    ],
+    confirmPassword: [
+      {
+        required: true,
+        validator: createConfirmPasswordValidator(() => passwordForm.password),
+        trigger: 'blur',
+      },
+    ],
+  }
+})
+
+onMounted(async () => {
+  captchaButton.value = document.getElementById('captcha-button')
+
+  const script = document.createElement('script')
+  script.src = 'https://o.alicdn.com/captcha-frontend/aliyunCaptcha/AliyunCaptcha.js'
+  script.async = true
+  script.onload = () => {
+    ;(window as any).initAliyunCaptcha({
+      SceneId: import.meta.env.VITE_ALIYUN_CAPTCHA_SCENE_ID,
+      prefix: import.meta.env.VITE_ALIYUN_CAPTCHA_PREFIX,
+      mode: 'popup',
+      button: '#captcha-button',
+      captchaVerifyCallback: captchaVerifyCallback,
+      getInstance: getInstance,
+      language: 'cn',
+    })
+  }
+
+  document.getElementsByTagName('head')[0]?.appendChild(script)
+})
+
+onBeforeUnmount(() => {
+  captchaButton.value = null
+
+  document.getElementById('aliyunCaptcha-mask')?.remove()
+  document.getElementById('aliyunCaptcha-window-popup')?.remove()
 })
 
 const login = () => {
@@ -103,6 +178,15 @@ const login = () => {
           placeholder="请再输入密码"
           show-password
         ></el-input>
+      </el-form-item>
+      <el-form-item label="验证码">
+        <el-input v-model="registerForm.code" placeholder="请输入验证码" maxlength="10">
+          <template #append>
+            <el-button id="captcha-button" :disabled="countdown > 0" @click="sendCode">
+              {{ countdown > 0 ? countdown + '秒后可再次获取' : '获取验证码' }}
+            </el-button>
+          </template>
+        </el-input>
       </el-form-item>
 
       <el-form-item> </el-form-item>

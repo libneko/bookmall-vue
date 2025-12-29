@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { CompleteOrderApi, DeleteOrderApi, getOrder, payOrderApi, ReminderOrderApi } from '@/api/order'
+import {
+  CompleteOrderApi,
+  DeleteOrderApi,
+  getOrder,
+  payOrderApi,
+  ReminderOrderApi,
+} from '@/api/order'
 import type { Order, SendOrder } from '@/api/types'
 import { OrderStatus, OrderStatusMap } from '@/utils/status'
 import { ElMessage, ElMessageBox, type CollapseModelValue } from 'element-plus'
@@ -11,14 +17,12 @@ const currentPage = ref(1) // 当前页码
 const pageSize = ref(5) // 每页显示数量 (设小一点方便看效果)
 const searchQuery = ref('')
 const total = ref(0)
-const payDialogVisible = ref(false);
-const payingOrder = ref<Order | null>(null);
-const payType = ref(1); // 1: 微信, 2: 支付宝
-const currentOrder = ref<Order | null>(null); // 存储当前点击的订单数据
+const payDialogVisible = ref(false)
+const payingOrder = ref<Order | null>(null)
+const payType = ref(1) // 1: 微信, 2: 支付宝
+const currentOrder = ref<Order | null>(null) // 存储当前点击的订单数据
 const activeNames = ref<string[]>([])
 let timer: any = null
-
-
 
 const handleChange = (val: CollapseModelValue) => {
   console.log(val)
@@ -34,34 +38,27 @@ const handleSizeChange = (val: number) => {
   console.log(`每页 ${val} 条`)
   pageSize.value = val
   currentPage.value = 1 // 改变每页大小时，建议重置回第一页
-  fetchOrders() 
+  fetchOrders()
 }
 
-
-
-const orders = ref<Order[]>([
-
-])
-
+const orders = ref<Order[]>([])
 
 const open_order = (orderId: number) => {
-  const targetOrder = orders.value.find(item => item.id === orderId);
+  const targetOrder = orders.value.find((item) => item.id === orderId)
   if (targetOrder) {
-    currentOrder.value = targetOrder; // 设置当前订单
-    dialogVisible.value = true;       // 打开弹窗
+    currentOrder.value = targetOrder // 设置当前订单
+    dialogVisible.value = true // 打开弹窗
   } else {
-    ElMessage.error('未找到订单数据');
+    ElMessage.error('未找到订单数据')
   }
 }
 const formatStatus = (status: number) => {
-
-  return OrderStatusMap[status] || { label: '未知状态', type: 'info' };
-};
+  return OrderStatusMap[status] || { label: '未知状态', type: 'info' }
+}
 const updateOrderStatus = (order: Order, targetStatus: number) => {
+  const targetConfig = OrderStatusMap[targetStatus] || { label: '操作', type: 'info' }
+  const actionName = targetConfig.label.replace('已', '')
 
-  const targetConfig = OrderStatusMap[targetStatus] || { label: '操作', type: 'info' };
-  const actionName = targetConfig.label.replace('已', '');
-  
   // 1. 二次确认弹窗
   ElMessageBox.confirm(
     `确认将订单 "${order.number}" 标记为【已${actionName}】吗？`,
@@ -70,46 +67,41 @@ const updateOrderStatus = (order: Order, targetStatus: number) => {
       confirmButtonText: '确认',
       cancelButtonText: '取消',
       type: targetConfig.type as any, // 动态使用定义的颜色
-    }
+    },
   )
     .then(async () => {
       console.log(targetConfig)
-      const res = await CompleteOrderApi(String(order.id));
+      const res = await CompleteOrderApi(String(order.id))
       console.log(res)
-  
+
       if (res.code === 1) {
-        ElMessage.success(`订单已成功${actionName}`);
-        order.status = targetStatus;
-      }
-      else {
+        ElMessage.success(`订单已成功${actionName}`)
+        order.status = targetStatus
+      } else {
         ElMessage.error('操作失败')
       }
     })
     .catch(() => {
-      ElMessage.info('已取消操作');
-    });
-};
+      ElMessage.info('已取消操作')
+    })
+}
 const confirmPayment = async () => {
-
-
   const res = await payOrderApi({
     order_number: payingOrder.value?.number || '',
-    payMethod: payType.value
+    payMethod: payType.value,
   })
-
 
   if (res.code === 1) {
     setTimeout(async () => {
-
-      await fetchOrders(); 
-    }, 500);
-    ElMessage.success(`订单 ${payingOrder.value?.number} 支付成功！`);
-    payDialogVisible.value = false;
+      await fetchOrders()
+    }, 500)
+    ElMessage.success(`订单 ${payingOrder.value?.number} 支付成功！`)
+    payDialogVisible.value = false
   }
-};
+}
 
 const stepActiveIndex = computed(() => {
-  const status = currentOrder.value?.status ?? 0;
+  const status = currentOrder.value?.status ?? 0
 
   // 这里的逻辑是：active 代表"完成"了多少步
   // 状态 1 (待付款): 完成 0 步 -> active = 0 (第1步高亮为进行中)
@@ -117,23 +109,23 @@ const stepActiveIndex = computed(() => {
   // 状态 3 (已发货): 完成 2 步 -> active = 2 (前2步变绿，第3步高亮)
   // 状态 4 (已送达): 完成 3 步 -> active = 3
   // 状态 5 (已完成): 完成 5 步 -> active = 5 (全部变绿)
-  if (status === 0) return 0;
+  if (status === 0) return 0
 
   if (status === OrderStatus.COMPLETED) {
-    return 5; // 全部完成
+    return 5 // 全部完成
   }
-  
+
   // 对于 1-4 的状态，active 应该是 status - 1
   // 例如 status=1(待付款)，active应该为0
-  return Math.max(0, status - 1);
-});
+  return Math.max(0, status - 1)
+})
 const handlePay = (order: Order) => {
-  payingOrder.value = order;
-  payType.value = order.pay_method || 1; // 默认选中订单原有的支付方式，或者微信
-  payDialogVisible.value = true;
-};
+  payingOrder.value = order
+  payType.value = order.pay_method || 1 // 默认选中订单原有的支付方式，或者微信
+  payDialogVisible.value = true
+}
 
-const delete_order= async (key: Order) => {
+const delete_order = async (key: Order) => {
   const res = await DeleteOrderApi(String(key.id))
   if (res.code !== 1) {
     ElMessage.error(res.message || '取消订单失败')
@@ -145,7 +137,6 @@ const delete_order= async (key: Order) => {
   }, 1000)
 }
 
-
 const reminder_order = async (id: number) => {
   const res = await ReminderOrderApi(id)
   if (res.code === 1) {
@@ -153,11 +144,11 @@ const reminder_order = async (id: number) => {
   }
 }
 
-const fetchOrders = async() => {
+const fetchOrders = async () => {
   const params: SendOrder = {
     page: currentPage.value,
     pageSize: pageSize.value,
-    status:null
+    status: null,
   }
 
   try {
@@ -168,11 +159,7 @@ const fetchOrders = async() => {
       orders.value = res.data.records
       total.value = res.data.total
     }
-  } catch (error) {
-    
-  }
-
-
+  } catch (error) {}
 }
 
 watch(searchQuery, () => {
@@ -193,7 +180,6 @@ onMounted(async () => {
   <div class="order">
     <div class="order-header">
       <!-- <span class="selected-count">已加载??个订单</span> -->
-
     </div>
 
     <el-card class="cart-container">
@@ -220,7 +206,7 @@ onMounted(async () => {
             <div class="order-id-header">
               <span>订单号：{{ order.number }}</span>
             </div>
-          </template>        
+          </template>
           <el-row align="middle">
             <el-col class="order-info" :span="12">
               <div
@@ -241,7 +227,10 @@ onMounted(async () => {
                     {{ order.order_detail_list[0]?.name }}
                   </h4>
                   <div style="font-size: 13px; color: #666">
-                    <span v-if="order.order_detail_list.length > 1" style="color: #409eff; margin-right: 10px">
+                    <span
+                      v-if="order.order_detail_list.length > 1"
+                      style="color: #409eff; margin-right: 10px"
+                    >
                       [等{{ order.order_detail_list.length }}件商品]
                     </span>
                     <span>单价: ¥{{ order.order_detail_list[0]?.amount }}</span>
@@ -250,10 +239,8 @@ onMounted(async () => {
               </div>
             </el-col>
             <el-col class="order-total" :span="3">
-              <span style="color: #f56c6c; font-weight: bold;">¥{{ order.amount.toFixed(2) }}</span>
-              <div style="font-size: 12px; color: #999">
-                (含运费 ¥{{ order.shipping_fee }})
-              </div>
+              <span style="color: #f56c6c; font-weight: bold">¥{{ order.amount.toFixed(2) }}</span>
+              <div style="font-size: 12px; color: #999">(含运费 ¥{{ order.shipping_fee }})</div>
             </el-col>
             <el-col class="order-staus" :span="3">
               <el-tag :type="formatStatus(order.status).type">
@@ -261,50 +248,59 @@ onMounted(async () => {
               </el-tag>
             </el-col>
             <el-col class="order-opera" :span="3">
-              <el-button type="primary" class = "button" @click="open_order(order.id)">
+              <el-button type="primary" class="button" @click="open_order(order.id)">
                 详情
               </el-button>
-              <el-button 
+              <el-button
                 v-if="order.status === OrderStatus.PAID"
-                type="primary" 
-                
+                type="primary"
                 @click="reminder_order(order.id)"
-                class = "button" 
+                class="button"
               >
                 催单
               </el-button>
-              <el-button 
-                type="success" 
-                :disabled="order.status === OrderStatus.CANCELLED || order.status === OrderStatus.COMPLETED"
+              <el-button
+                type="success"
+                :disabled="
+                  order.status === OrderStatus.CANCELLED || order.status === OrderStatus.COMPLETED
+                "
                 @click="updateOrderStatus(order, OrderStatus.COMPLETED)"
-                class = "button" 
+                class="button"
               >
                 确认收货
               </el-button>
-              <el-button 
+              <el-button
                 v-if="order.status === OrderStatus.PENDING_PAYMENT"
-                type="danger" 
-                class = "button" 
+                type="danger"
+                class="button"
                 @click="handlePay(order)"
               >
                 立即支付
               </el-button>
-              <el-button 
-                type="danger" 
-                :disabled="order.status === OrderStatus.CANCELLED || order.status === OrderStatus.COMPLETED"
+              <el-button
+                type="danger"
+                :disabled="
+                  order.status === OrderStatus.CANCELLED || order.status === OrderStatus.COMPLETED
+                "
                 @click="delete_order(order)"
-                class = "button" 
+                class="button"
               >
                 取消订单
               </el-button>
-              
             </el-col>
             <el-col class="order-time" :span="3">
-              <span style="font-size: 13px; color: #999;">{{ order.order_time }}</span>
+              <span style="font-size: 13px; color: #999">{{ order.order_time }}</span>
             </el-col>
           </el-row>
-          <el-collapse v-model="activeNames" @change="handleChange" v-if="order.order_detail_list.length > 1">
-            <el-collapse-item :title="`查看其余 ${order.order_detail_list.length - 1} 件商品`" :name="order.id">
+          <el-collapse
+            v-model="activeNames"
+            @change="handleChange"
+            v-if="order.order_detail_list.length > 1"
+          >
+            <el-collapse-item
+              :title="`查看其余 ${order.order_detail_list.length - 1} 件商品`"
+              :name="order.id"
+            >
               <div
                 v-for="book in order.order_detail_list.slice(1)"
                 :key="book.id"
@@ -322,7 +318,7 @@ onMounted(async () => {
                 />
 
                 <div style="flex: 1">
-                  <div style="font-size: 14px">{{ book.name}}</div>
+                  <div style="font-size: 14px">{{ book.name }}</div>
                   <div style="font-size: 12px; color: #999; margin-top: 4px">
                     ¥{{ book.amount }} × {{ book.number }}
                   </div>
@@ -344,39 +340,47 @@ onMounted(async () => {
             background
           />
         </div>
-      
       </div>
     </el-card>
-    <el-dialog
-      v-model="dialogVisible"
-      title="订单详情"
-      width="700px"
-      destroy-on-close
-    >
+    <el-dialog v-model="dialogVisible" title="订单详情" width="700px" destroy-on-close>
       <div v-if="currentOrder">
-        <el-steps 
-          :active="stepActiveIndex"
-          finish-status="success" 
-          simple 
-          style="margin-bottom: 20px"
+        <div
+          v-if="currentOrder.status === OrderStatus.CANCELLED"
+          style="margin-bottom: 20px; color: #909399; text-align: center"
         >
-          <el-step title="待付款" />
-          <el-step title="待发货" /> 
-          <el-step title="已发货" />
-          <el-step title="已送达" />
-          <el-step title="已完成" />
-        </el-steps>
-
+          <el-steps :active="2" simple style="margin-bottom: 20px">
+            <el-step title="订单提交" status="success" icon="Document" />
+            <el-step title="已取消" status="error" icon="CircleCloseFilled" />
+          </el-steps>
+        </div>
+        <div v-else>
+          <el-steps
+            :active="stepActiveIndex"
+            finish-status="success"
+            simple
+            style="margin-bottom: 20px"
+          >
+            <el-step title="待付款" />
+            <el-step title="待发货" />
+            <el-step title="已发货" />
+            <el-step title="已送达" />
+            <el-step title="已完成" />
+          </el-steps>
+        </div>
         <el-descriptions title="基本信息" :column="2" border>
           <el-descriptions-item label="订单编号">{{ currentOrder.number }}</el-descriptions-item>
-          <el-descriptions-item label="下单时间">{{ currentOrder.order_time }}</el-descriptions-item>
+          <el-descriptions-item label="下单时间">{{
+            currentOrder.order_time
+          }}</el-descriptions-item>
           <el-descriptions-item label="收货人">{{ currentOrder.consignee }}</el-descriptions-item>
           <el-descriptions-item label="联系电话">{{ currentOrder.phone }}</el-descriptions-item>
           <el-descriptions-item label="支付方式">
             {{ currentOrder.pay_method === 1 ? '微信支付' : '支付宝' }}
           </el-descriptions-item>
           <el-descriptions-item label="订单金额">
-            <span style="color: #f56c6c; font-weight: bold">¥{{ currentOrder.amount.toFixed(2) }}</span>
+            <span style="color: #f56c6c; font-weight: bold"
+              >¥{{ currentOrder.amount.toFixed(2) }}</span
+            >
           </el-descriptions-item>
         </el-descriptions>
 
@@ -385,9 +389,9 @@ onMounted(async () => {
           <el-table :data="currentOrder.order_detail_list" border stripe size="small">
             <el-table-column label="商品图片" width="80" align="center">
               <template #default="scope">
-                <el-image 
-                  style="width: 40px; height: 50px" 
-                  :src="scope.row.image" 
+                <el-image
+                  style="width: 40px; height: 50px"
+                  :src="scope.row.image"
                   preview-teleported
                 />
               </template>
@@ -404,32 +408,24 @@ onMounted(async () => {
             </el-table-column>
           </el-table>
         </div>
-        
+
         <div style="margin-top: 20px" v-if="currentOrder.status >= 3">
-           <el-alert title="配送信息" type="info" :closable="false">
-             <template #default>
-                <div>预计送达：{{ currentOrder.estimated_delivery_time || '计算中...' }}</div>
-                <div>实际发货：{{ currentOrder.delivery_time }}</div>
-             </template>
-           </el-alert>
+          <el-alert title="配送信息" type="info" :closable="false">
+            <template #default>
+              <div>预计送达：{{ currentOrder.estimated_delivery_time || '计算中...' }}</div>
+              <div>实际发货：{{ currentOrder.delivery_time }}</div>
+            </template>
+          </el-alert>
         </div>
       </div>
-      <div v-else style="margin-bottom: 20px; color: #909399; text-align: center;">
-        <el-tag type="info" size="large">该订单已取消</el-tag>
-      </div>
+
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">关 闭</el-button>
         </span>
       </template>
     </el-dialog>
-    <el-dialog
-      v-model="payDialogVisible"
-      title="收银台"
-      width="450px"
-      center
-      destroy-on-close
-    >
+    <el-dialog v-model="payDialogVisible" title="收银台" width="450px" center destroy-on-close>
       <div v-if="payingOrder" class="cashier-container">
         <div class="pay-amount">
           <p>支付金额</p>
@@ -457,16 +453,16 @@ onMounted(async () => {
 
         <div class="qr-section">
           <div class="qr-box">
-             <el-image 
-                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SimulatePayment" 
-                style="width: 150px; height: 150px"
-             />
-             <div class="qr-mask" v-if="false">
-                 <el-icon><Refresh /></el-icon>
-             </div>
+            <el-image
+              src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SimulatePayment"
+              style="width: 150px; height: 150px"
+            />
+            <div class="qr-mask" v-if="false">
+              <el-icon><Refresh /></el-icon>
+            </div>
           </div>
           <p class="qr-tip">
-            请使用{{ payType === 1 ? '微信' : '支付宝' }}扫一扫<br>扫描二维码支付
+            请使用{{ payType === 1 ? '微信' : '支付宝' }}扫一扫<br />扫描二维码支付
           </p>
         </div>
       </div>
@@ -516,7 +512,7 @@ onMounted(async () => {
   font-weight: bold;
 }
 
-.button{
+.button {
   margin-top: 10px;
   margin-left: 12px;
   margin-right: 15px;

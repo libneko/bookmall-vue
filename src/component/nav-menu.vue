@@ -20,7 +20,7 @@ defineEmits(['menu-click'])
       </el-menu-item>
       <el-menu-item index="/order">
         <el-icon><Document /></el-icon> 订单管理
-      </el-menu-item> 
+      </el-menu-item>
     </div>
   </el-menu>
 </template>

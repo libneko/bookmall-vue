@@ -575,7 +575,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-
 .add-btn {
   background-color: var(--el-color-primary);
   border-color: var(--el-color-primary);

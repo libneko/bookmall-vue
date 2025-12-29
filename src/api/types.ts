@@ -30,6 +30,7 @@ export interface RegisterForm {
   username: string
   password: string
   email: string
+  code: string
 }
 
 export interface BookStock {
@@ -89,7 +90,7 @@ export interface ShoppingCartItem {
   amount: number // 金额
   image: string
   create_time: string
-  selected:boolean
+  selected: boolean
 }
 
 //更新购物车
@@ -103,7 +104,7 @@ export interface ShoppingDeleteForm {
   id: number
 }
 
-export interface SendOrder{
+export interface SendOrder {
   page: number
   pageSize: number
   status?: number | null
@@ -156,7 +157,7 @@ export interface items {
 
 export interface Order {
   id: number
-  number:string
+  number: string
   status: number
   user_id: number
   address_book_id: number
@@ -176,7 +177,7 @@ export interface Order {
   order_detail_list: OrderDetail[]
 }
 
-export interface OrderDetail{
+export interface OrderDetail {
   id: number
   name: string
   order_id: number
@@ -184,13 +185,11 @@ export interface OrderDetail{
   number: number
   amount: number
   image: string
-  
 }
-export interface GetOrders{
+export interface GetOrders {
   total: number
   records: Order[]
 }
-
 
 export interface Notice {
   id: string
@@ -199,7 +198,7 @@ export interface Notice {
   create_time: string
 }
 
-export interface PayInfo{
+export interface PayInfo {
   order_number: string
   payMethod: number
 }
@@ -222,7 +221,7 @@ export interface AddressBook {
   is_default: boolean
 }
 
-export interface SubmitOrder{
+export interface SubmitOrder {
   address_book_id: number
   pay_method: number
   estimated_delivery_time: string
@@ -230,7 +229,7 @@ export interface SubmitOrder{
   amount: number
 }
 
-export interface OrderPesponse{
+export interface OrderPesponse {
   id: number
   orderNumber: string
   orderAmount: number

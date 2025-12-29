@@ -9,7 +9,14 @@ import {
   SubmitOrderApi,
   getAddressApi,
 } from '@/api/shopping-cart'
-import type { AddressBook, ApiResponse, Product, SubmitOrder, ShoppingCartItem, Store } from '@/api/types'
+import type {
+  AddressBook,
+  ApiResponse,
+  Product,
+  SubmitOrder,
+  ShoppingCartItem,
+  Store,
+} from '@/api/types'
 import { bookApi } from '@/api/introduction'
 import { openBook } from '@/api/meta'
 import router from '@/router'
@@ -38,17 +45,15 @@ const orderInfo = reactive({
 })
 
 const rules = reactive<FormRules>({
-  addressId: [
-    { required: true, message: '请选择收货地址', trigger: 'change' }
-  ],
+  addressId: [{ required: true, message: '请选择收货地址', trigger: 'change' }],
   paymentMethod: [{ required: true, message: '请选择支付方式', trigger: 'change' }],
 })
 
 const addressList = ref<AddressBook[]>([])
 
 const initMockData = () => {
-// 自动选中默认地址
-  const defaultAddr = addressList.value.find(addr => addr.is_default)
+  // 自动选中默认地址
+  const defaultAddr = addressList.value.find((addr) => addr.is_default)
   if (defaultAddr) {
     formData.addressId = defaultAddr.id
   }
@@ -89,11 +94,11 @@ const fetchShoppingCartData = async () => {
         return {
           ...bookDetail,
           // 关键修改 1: 绑定购物车ID，方便后续更新
-          cartId: cartItem.id, 
+          cartId: cartItem.id,
           // 关键修改 2: 数量和选中状态都从后端取
           quantity: cartItem.number,
           selected: Boolean(cartItem.selected), // 确保转为布尔值
-          
+
           // 其他前端字段
           specifications: ['默认规格'],
           freeShipping: cartItem.amount > 10,
@@ -119,12 +124,10 @@ const fetchAddressData = async () => {
   const res = await getAddressApi()
   if (res.code === 1) {
     console.log(res.data)
-    addressList.value=res.data
-  }
-  else {
+    addressList.value = res.data
+  } else {
     ElMessage.error('地址获取失败')
   }
-  
 }
 
 // 计算属性 - 所有商品列表
@@ -144,20 +147,18 @@ const totalPrice = computed(() => {
     .reduce((total: number, item: Product) => total + item.price * item.quantity, 0)
 })
 
-
-
 // 方法 - 更新店铺的不确定状态
 const updateStoreIndeterminate = () => {
   if (!store.value) return
-  
+
   const items = store.value.items
   const total = items.length
   // 统计已选中的数量
-  const selectedCount = items.filter(item => item.selected).length
+  const selectedCount = items.filter((item) => item.selected).length
 
   // 逻辑：如果选中的数量等于总数，且总数大于0，则为全选
   store.value.selected = selectedCount === total && total > 0
-  
+
   // 逻辑：如果选中数大于0 且 小于总数，则为半选状态
   store.value.indeterminate = selectedCount > 0 && selectedCount < total
 }
@@ -165,7 +166,7 @@ const refreshStoreState = () => {
   const items = store.value.items
   const total = items.length
   // 计算已选中的数量
-  const selectedCount = items.filter(item => item.selected).length
+  const selectedCount = items.filter((item) => item.selected).length
 
   // 全选条件：所有都被选中 且 列表不为空
   store.value.selected = selectedCount === total && total > 0
@@ -174,20 +175,19 @@ const refreshStoreState = () => {
 }
 
 const handleItemSelectChange = async (item: Product) => {
-
   updateStoreIndeterminate()
   if (itemTimers.has(item.id)) {
     clearTimeout(itemTimers.get(item.id))
-  }    
+  }
   // B. 发送请求给后端
-// 3. 设定一个新的计时器 (比如 1000ms 后执行)
+  // 3. 设定一个新的计时器 (比如 1000ms 后执行)
   const timer = setTimeout(async () => {
     try {
       console.log(`[防抖结束] 正在向后端同步商品ID: ${item.id}, 状态: ${item.selected}`)
-      
+
       // TODO: 这里调用你的真实接口
       // await updateCartItemApi({ id: item.cartId, selected: item.selected })
-      
+
       // 请求成功后，从 Map 中移除该计时器记录
       itemTimers.delete(item.id)
     } catch (error) {
@@ -210,7 +210,7 @@ const handleSelectAllChange = async (val: boolean) => {
   // B. 更新半选状态 UI
   updateStoreIndeterminate()
   if (itemTimers.size > 0) {
-    itemTimers.forEach(timer => clearTimeout(timer))
+    itemTimers.forEach((timer) => clearTimeout(timer))
     itemTimers.clear()
   }
   if (selectAllTimer) {
@@ -220,10 +220,9 @@ const handleSelectAllChange = async (val: boolean) => {
   selectAllTimer = setTimeout(async () => {
     try {
       console.log(`[防抖结束] 正在向后端同步全选状态: ${val}`)
-      
+
       // TODO: 调用批量修改接口
       // await updateCartBatchApi({ selected: val })
-      
     } catch (error) {
       console.error('全选同步失败', error)
       // 失败回滚逻辑...
@@ -232,8 +231,6 @@ const handleSelectAllChange = async (val: boolean) => {
     }
   }, 1000) // <--- 延迟 1 秒
 }
-
-
 
 // 方法 - 处理数量变化（调用API）
 const handleQuantityChange = async (item: Product) => {
@@ -310,7 +307,7 @@ const clearCart = async () => {
   }
 }
 
-const checkProfile = async ()=>{
+const checkProfile = async () => {
   const loginUserStr = localStorage.getItem('login_user')
   if (loginUserStr) {
     const loginUser = JSON.parse(loginUserStr)
@@ -321,20 +318,17 @@ const checkProfile = async ()=>{
         if (res.code === 1) {
           if (res.data.phone === null) {
             ElMessage.error('您的个人信息不完整，请先完善个人信息')
-          }
-          else {
+          } else {
             ischeck.value = 1
           }
         } else {
           ElMessage.error(res.message || '获取用户信息失败')
-          
         }
       } catch (error) {
         console.error(error)
       }
     }
   }
-
 }
 
 // 方法 - 处理结算
@@ -348,11 +342,7 @@ const handleCheckout = async () => {
     return
   }
 
-
-  const now = Temporal.Now
-              .plainDateTimeISO()
-              .toString({ smallestUnit: "second" })
-              .replace("T", " ")
+  const now = Temporal.Now.plainDateTimeISO().toString({ smallestUnit: 'second' }).replace('T', ' ')
   orderInfo.estimatedTime = now.toString()
   console.log(orderInfo.estimatedTime)
   dialogVisible.value = true
@@ -366,15 +356,15 @@ const submitOrder = async () => {
     if (valid) {
       isSubmitting.value = true // 开启加载状态
       const payMethodMap: Record<string, number> = {
-        'wechat': 1,
-        'alipay': 2
+        wechat: 1,
+        alipay: 2,
       }
       const requestData: SubmitOrder = {
         address_book_id: formData.addressId!, // 使用 ! 断言，因为通过 validate 校验后一定不为空
-        pay_method: payMethodMap[formData.paymentMethod] ?? 1, 
+        pay_method: payMethodMap[formData.paymentMethod] ?? 1,
         estimated_delivery_time: orderInfo.estimatedTime,
         shipping_fee: orderInfo.shippingFee,
-        amount: orderInfo.totalAmount
+        amount: orderInfo.totalAmount,
       }
       console.log('提交订单数据:', requestData)
       const res = await SubmitOrderApi(requestData)
@@ -383,7 +373,7 @@ const submitOrder = async () => {
           isSubmitting.value = false
           dialogVisible.value = false
           location.reload()
-          
+
           // 此处可以添加跳转逻辑
         }, 1500)
         ElMessage.success('订单提交成功，请在订单管理支付')
@@ -392,8 +382,6 @@ const submitOrder = async () => {
         isSubmitting.value = false
         return
       }
-
-
     } else {
       ElMessage.warning('请检查输入信息是否完整')
     }
@@ -541,16 +529,16 @@ onMounted(() => {
       label-position="top"
     >
       <el-form-item label="收货地址" prop="addressId">
-        <el-select 
-          v-model="formData.addressId" 
-          placeholder="请选择收货地址" 
+        <el-select
+          v-model="formData.addressId"
+          placeholder="请选择收货地址"
           style="width: 100%"
           no-data-text="暂无地址，请前往地址管理添加"
         >
           <el-option
             v-for="item in addressList"
             :key="item.id"
-            :label="formatAddressForInput(item)" 
+            :label="formatAddressForInput(item)"
             :value="item.id"
             class="address-option"
           >
@@ -559,13 +547,19 @@ onMounted(() => {
                 <el-tag v-if="item.label" size="small" effect="plain" class="mr-2">
                   {{ item.label }}
                 </el-tag>
-                <el-tag v-if="item.is_default" size="small" type="danger" effect="dark" class="mr-2">
+                <el-tag
+                  v-if="item.is_default"
+                  size="small"
+                  type="danger"
+                  effect="dark"
+                  class="mr-2"
+                >
                   默认
                 </el-tag>
                 <span class="font-bold">{{ item.consignee }}</span>
                 <span class="ml-2 text-gray-500">{{ item.phone }}</span>
               </div>
-              
+
               <div class="option-bottom text-truncate">
                 {{ getFullAddress(item) }}
               </div>
