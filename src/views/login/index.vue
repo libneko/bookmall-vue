@@ -177,6 +177,7 @@ onBeforeUnmount(() => {
             <el-input
               v-model="pwdForm.password"
               type="password"
+              class="password-input"
               placeholder="请输入密码"
               show-password
             />
@@ -203,8 +204,8 @@ onBeforeUnmount(() => {
   align-items: center;
 }
 
-:deep(.el-input__wrapper) {
-  padding-right: 40px !important;
+:deep(.password-input .el-input__wrapper) {
+  padding-right: 30px !important;
 }
 
 /* 使 el-tabs 标签居中 */

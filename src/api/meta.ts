@@ -14,7 +14,7 @@ export const getBookUrl = (book_id: number) => {
 }
 
 export const isValidEmail = (email: string): boolean => {
-  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+  const emailRegex = /^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/
   return emailRegex.test(email)
 }
 
@@ -45,9 +45,13 @@ export const validatePhone = (rule: any, value: string, callback: any) => {
 }
 
 export const validateEmail = (rule: any, value: string, callback: any) => {
-  if (!value) {
+  const safeValue = value ? value.trim() : ''
+
+  if (!safeValue) {
+    // 如果是必填项，报空错误
     callback(new Error('请输入邮箱'))
-  } else if (!isValidEmail(value)) {
+  } else if (!isValidEmail(safeValue)) {
+    // 只要正则不过，就报错
     callback(new Error('邮箱格式不正确'))
   } else {
     callback()

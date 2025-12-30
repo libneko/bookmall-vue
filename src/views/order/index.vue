@@ -279,9 +279,7 @@ onMounted(async () => {
               </el-button>
               <el-button
                 type="danger"
-                :disabled="
-                  order.status === OrderStatus.CANCELLED || order.status === OrderStatus.COMPLETED
-                "
+                :disabled="order.status >= OrderStatus.DELIVERED"
                 @click="delete_order(order)"
                 class="button"
               >
@@ -297,16 +295,11 @@ onMounted(async () => {
             @change="handleChange"
             v-if="order.order_detail_list.length > 1"
           >
-            <el-collapse-item
-
-              :name="order.id"
-            >
+            <el-collapse-item :name="order.id">
               <template #title>
-                <span style="margin-right: 8px;">
-                  {{ activeNames.includes(order.id) 
-                    ? '收起' 
-                    : '查看' 
-                  }}其余 {{ order.order_detail_list.length - 1 }} 件商品
+                <span style="margin-right: 8px">
+                  {{ activeNames.includes(order.id) ? '收起' : '查看' }}其余
+                  {{ order.order_detail_list.length - 1 }} 件商品
                 </span>
               </template>
 

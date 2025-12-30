@@ -151,7 +151,7 @@ const login = () => {
 
 <template>
   <AuthLayout>
-    <el-form :model="passwordForm" :rules="rules" ref="formRef" label-width="80px">
+    <el-form :model="passwordForm" :rules="rules" ref="formRef" label-width="80px" class="form">
       <p class="title">注册账户</p>
       <el-form-item label="注册邮箱" prop="email">
         <el-input v-model="registerForm.email" placeholder="请输入邮箱"></el-input>
@@ -167,6 +167,7 @@ const login = () => {
           minlength="8"
           maxlength="20"
           v-model="passwordForm.password"
+          class="password-input"
           placeholder="输入密码（8-20位）"
           show-password
         ></el-input>
@@ -177,20 +178,31 @@ const login = () => {
           type="password"
           v-model="passwordForm.confirmPassword"
           placeholder="请再输入密码"
+          class="password-input"
           show-password
         ></el-input>
       </el-form-item>
       <el-form-item label="验证码">
-        <el-input v-model="registerForm.code" placeholder="请输入验证码" maxlength="10">
-          <template #append>
-            <el-button id="captcha-button" :disabled="countdown > 0" @click="sendCode">
-              {{ countdown > 0 ? countdown + '秒后可再次获取' : '获取验证码' }}
-            </el-button>
-          </template>
-        </el-input>
+        <div class="captcha-box">
+          <el-input
+            v-model="registerForm.code"
+            placeholder="请输入验证码"
+            maxlength="10"
+            class="captcha-input"
+          >
+          </el-input>
+          <el-button
+            id="captcha-button"
+            type="primary"
+            plain
+            :disabled="countdown > 0"
+            @click="sendCode"
+            class="captcha-btn"
+          >
+            {{ countdown > 0 ? countdown + '秒后可再次获取' : '获取验证码' }}
+          </el-button>
+        </div>
       </el-form-item>
-
-      <el-form-item> </el-form-item>
     </el-form>
     <el-button type="primary" @click="submit">注 册</el-button>
     <el-link href="#" underline="never" @click="login">已有账号？去登录</el-link>
@@ -206,8 +218,8 @@ const login = () => {
   align-items: center;
 }
 
-:deep(.el-input__wrapper) {
-  padding-right: 40px !important;
+:deep(.password-input .el-input__wrapper) {
+  padding-right: 5% !important;
 }
 
 .title {
@@ -216,5 +228,31 @@ const login = () => {
   text-align: center;
   margin-bottom: 30px;
   font-weight: bold;
+}
+.captcha-box {
+  display: flex; /* 开启弹性布局 */
+  width: 100%; /* 占满父容器宽度 */
+  align-items: center; /* 垂直居中 */
+}
+
+/* 输入框 */
+.captcha-input {
+  flex: 1; /* 关键：让输入框自动收缩/拉伸以适应剩余空间 */
+  min-width: 30%; /* 防止 flex 子项在内容过多时无法收缩 */
+}
+
+/* 按钮 */
+.captcha-btn {
+  /* 保持按钮的默认大小，不要被压缩 */
+  flex-shrink: 0;
+  width: 50%;
+}
+
+/* 针对小屏幕（手机）的额外优化 */
+@media (max-width: 480px) {
+  .captcha-btn {
+    font-size: 12px; /* 字体变小 */
+    padding: 8px 8px; /* 内边距变小 */
+  }
 }
 </style>

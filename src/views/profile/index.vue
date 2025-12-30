@@ -26,6 +26,8 @@ const combinedFormData = computed(() => ({
 
 const rules = computed<FormRules>(() => {
   return {
+    username: [{ max: 30, message: '用户名不超过30个字符', trigger: 'blur' }],
+
     // 1. 邮箱：只有点击了编辑邮箱(isEmailEditing为真)才校验，否则为空数组(不校验)
     email: isEmailEditing.value
       ? [{ required: true, validator: validateEmail, trigger: 'blur' }]
@@ -229,14 +231,8 @@ const save = async () => {
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
 
-        <el-form-item label="邮箱" class="choose-edit">
-          <el-input
-            v-model="form.email"
-            :disabled="!isEmailEditing"
-            placeholder="请输入邮箱"
-            class="edit"
-          />
-          <el-button type="primary" @click="handleEditEmail">编辑</el-button>
+        <el-form-item label="邮箱" class="profile-form">
+          <el-input v-model="form.email" disabled />
         </el-form-item>
 
         <el-form-item label="手机号" class="choose-edit" prop="phone">

@@ -209,7 +209,9 @@ onMounted(async () => {
   align-items: center;
   transition: 0.5s;
   :deep(.el-input__wrapper) {
-    transition: background-color 0.3s, box-shadow 0.3s;
+    transition:
+      background-color 0.3s,
+      box-shadow 0.3s;
   }
 }
 
@@ -313,9 +315,9 @@ onMounted(async () => {
 html.dark .search-input {
   :deep(.el-input__wrapper) {
     /* 深灰色半透明背景 */
-    background-color: rgba(30, 30, 30, 0.6); 
+    background-color: rgba(30, 30, 30, 0.6);
     /* 调整边框颜色，避免太亮 */
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset; 
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
   }
 
   /* 输入框文字颜色 */
@@ -330,13 +332,14 @@ html.dark .search-input {
   :deep(.el-select .el-input__inner) {
     color: #e5eaf3;
   }
-  
+
   /* 搜索图标按钮颜色适配 */
   :deep(.el-input-group__append) {
     background-color: rgba(30, 30, 30, 0.6);
-    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.2) inset, 
-                0 -1px 0 0 rgba(255, 255, 255, 0.2) inset, 
-                -1px 0 0 0 rgba(255, 255, 255, 0.2) inset;
+    box-shadow:
+      0 1px 0 0 rgba(255, 255, 255, 0.2) inset,
+      0 -1px 0 0 rgba(255, 255, 255, 0.2) inset,
+      -1px 0 0 0 rgba(255, 255, 255, 0.2) inset;
     color: #fff;
   }
 }
