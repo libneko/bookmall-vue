@@ -208,6 +208,9 @@ onMounted(async () => {
   justify-content: center;
   align-items: center;
   transition: 0.5s;
+  :deep(.el-input__wrapper) {
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
 }
 
 .search-input.active {
@@ -305,6 +308,37 @@ onMounted(async () => {
   transition:
     box-shadow 0.4s ease,
     transform 0.3s;
+}
+
+html.dark .search-input {
+  :deep(.el-input__wrapper) {
+    /* 深灰色半透明背景 */
+    background-color: rgba(30, 30, 30, 0.6); 
+    /* 调整边框颜色，避免太亮 */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) inset; 
+  }
+
+  /* 输入框文字颜色 */
+  :deep(.el-input__inner) {
+    color: #e5eaf3;
+    &::placeholder {
+      color: #a3a6ad; /* 占位符颜色 */
+    }
+  }
+
+  /* 左侧 Select 下拉框的文字颜色 */
+  :deep(.el-select .el-input__inner) {
+    color: #e5eaf3;
+  }
+  
+  /* 搜索图标按钮颜色适配 */
+  :deep(.el-input-group__append) {
+    background-color: rgba(30, 30, 30, 0.6);
+    box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.2) inset, 
+                0 -1px 0 0 rgba(255, 255, 255, 0.2) inset, 
+                -1px 0 0 0 rgba(255, 255, 255, 0.2) inset;
+    color: #fff;
+  }
 }
 
 :deep(.el-button) {

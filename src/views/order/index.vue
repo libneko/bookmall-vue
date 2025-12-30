@@ -21,7 +21,7 @@ const payDialogVisible = ref(false)
 const payingOrder = ref<Order | null>(null)
 const payType = ref(1) // 1: 微信, 2: 支付宝
 const currentOrder = ref<Order | null>(null) // 存储当前点击的订单数据
-const activeNames = ref<string[]>([])
+const activeNames = ref<number[]>([])
 let timer: any = null
 
 const handleChange = (val: CollapseModelValue) => {
@@ -298,9 +298,18 @@ onMounted(async () => {
             v-if="order.order_detail_list.length > 1"
           >
             <el-collapse-item
-              :title="`查看其余 ${order.order_detail_list.length - 1} 件商品`"
+
               :name="order.id"
             >
+              <template #title>
+                <span style="margin-right: 8px;">
+                  {{ activeNames.includes(order.id) 
+                    ? '收起' 
+                    : '查看' 
+                  }}其余 {{ order.order_detail_list.length - 1 }} 件商品
+                </span>
+              </template>
+
               <div
                 v-for="book in order.order_detail_list.slice(1)"
                 :key="book.id"

@@ -40,7 +40,7 @@ const rules = computed<FormRules>(() => {
     password: isPasswordEditing.value
       ? [
           { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, max: 20, message: '长度在 6 到 20 个字符', trigger: 'blur' },
+          { min: 8, max: 20, message: '长度在 8 到 20 个字符', trigger: 'blur' },
         ]
       : [],
 

@@ -354,4 +354,39 @@ const handleChange = (value: number) => {
     margin-left: 0 !important;
   }
 }
+
+html.dark .books {
+  /* 1. 设置整体背景色为 Element Plus 标准深色背景 */
+  background-color: var(--el-bg-color);
+  /* 或者使用稍微亮一点的层级背景： var(--el-bg-color-overlay) */
+  
+  /* 2. 确保主文字颜色适配 */
+  color: var(--el-text-color-primary);
+  
+  /* 3. 添加过渡动画，让切换不生硬 */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 针对次要文字（如作者、ISBN、出版社）设置稍微淡一点的颜色，提升层次感 */
+html.dark .books-intro h3,
+html.dark .books-auth p,
+html.dark .books-intro p {
+  color: var(--el-text-color-regular);
+}
+
+/* 针对价格进行特殊突出（通常价格保持红色或高亮色，但在深色下可能需要微调） */
+html.dark .books-price p {
+  color: var(--el-color-danger); /* 使用 Element 的红色变量 */
+  font-weight: bold;
+}
+
+/* 如果你的 books-introduction 这种小标题有背景色，也需要处理 */
+
+
+/* 4. 如果你的布局有边框，记得把边框变暗 */
+html.dark .books-row1, 
+html.dark .books-col1 {
+  border-color: var(--el-border-color-darker);
+}
+
 </style>
