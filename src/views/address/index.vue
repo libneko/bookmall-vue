@@ -76,6 +76,24 @@ const loadAddressList = async () => {
     const response = await getAddressApi()
     console.log('Fetched address list:', response)
     if (response.code === 1) {
+      // 检查是否只剩下一个地址
+      const remainingAddresses = response.data as AddressBook[]
+
+      if (remainingAddresses.length === 1) {
+        // 只剩下一个地址，自动设置为默认地址
+        const lastAddress = remainingAddresses[0]
+        // 如果最后一个地址不是默认地址，则设置为默认
+        if (lastAddress && !lastAddress.is_default) {
+          try {
+            const setDefaultResponse = await setDefaultAddressApi(lastAddress.id!)
+            if (setDefaultResponse.code === 1) {
+              ElMessage.success('只剩下一个地址，已自动设为默认')
+            }
+          } catch (defaultError) {
+            console.error('设置默认地址失败:', defaultError)
+          }
+        }
+      }
       // 排序：默认地址放前面
       addressList.value = response.data.sort((a: AddressBook, b: AddressBook) => {
         // 默认地址排前面
@@ -254,20 +272,9 @@ const saveAddress = async () => {
     }
 
     console.log('提交的地址数据:', addressData)
-
-    if (addressData.is_default) {
-      // 如果设置为默认地址，取消其他地址的默认状态
-      addressList.value.forEach((addr) => {
-        if (addr.is_default) {
-          addr.is_default = false
-        }
-      })
-    }
-
     if (currentEditingId.value) {
       // 编辑地址
       const response = await updateAddressApi(addressData)
-      console.log('Response from updateAddressApi:', response)
       if (response.code === 1) {
         await loadAddressList()
         ElMessage.success('地址更新成功')
@@ -278,11 +285,12 @@ const saveAddress = async () => {
     } else {
       // 添加地址
       const response = await saveAddressApi(addressData)
-      console.log('Response from saveAddressApi:', response)
       if (response.code === 1) {
         await loadAddressList()
         ElMessage.success('地址添加成功')
         dialogVisible.value = false
+        // 重置表单
+        resetForm()
       } else {
         ElMessage.error(response.message || '添加失败')
       }
@@ -292,7 +300,6 @@ const saveAddress = async () => {
   }
 }
 
-// 删除地址
 // 删除地址
 const deleteAddress = async (id: number) => {
   try {
@@ -304,26 +311,6 @@ const deleteAddress = async (id: number) => {
 
     const response = await deleteAddressApi(id)
     if (response.code === 1) {
-      // 删除成功后，检查是否只剩下一个地址
-      const remainingAddresses = addressList.value.filter((addr) => addr.id !== id)
-
-      if (remainingAddresses.length === 1) {
-        // 只剩下一个地址，自动设置为默认地址
-        const lastAddress = remainingAddresses[0]
-
-        // 如果最后一个地址不是默认地址，则设置为默认
-        if (lastAddress && !lastAddress.is_default) {
-          try {
-            const setDefaultResponse = await setDefaultAddressApi(lastAddress.id!)
-            if (setDefaultResponse.code === 1) {
-              ElMessage.success('只剩下一个地址，已自动设为默认')
-            }
-          } catch (defaultError) {
-            console.error('设置默认地址失败:', defaultError)
-          }
-        }
-      }
-
       // 重新加载地址列表
       await loadAddressList()
       ElMessage.success('地址删除成功')
@@ -352,7 +339,9 @@ const setDefaultAddress = async (id: number) => {
 
 // 计算完整的地址字符串
 const getFullAddress = (address: AddressBook) => {
-  return `${address.province_name || ''}${address.city_name || ''}${address.district_name || ''}${address.detail || ''}`
+  return `${address.province_name || ''}${address.city_name || ''}${
+    address.district_name || ''
+  }${address.detail || ''}`
 }
 
 // 获取性别标签
@@ -524,12 +513,6 @@ onMounted(() => {
               :value="option.value"
             />
           </el-select>
-        </el-form-item>
-
-        <el-form-item>
-          <el-checkbox v-model="addressForm.is_default" class="default-checkbox">
-            设为默认地址
-          </el-checkbox>
         </el-form-item>
       </el-form>
 

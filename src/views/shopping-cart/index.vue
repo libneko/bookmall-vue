@@ -407,7 +407,8 @@ onMounted(() => {
               >全选
             </el-checkbox>
           </el-col>
-          <el-col :span="10">图书</el-col>
+          <el-col :span="2"></el-col>
+          <el-col :span="8">图书</el-col>
           <el-col class="head-label" :span="3">单价</el-col>
           <el-col class="head-label" :span="3">数量</el-col>
           <el-col class="head-label" :span="3">小计</el-col>
@@ -458,7 +459,7 @@ onMounted(() => {
             </el-col>
 
             <!-- 数量控制 -->
-            <el-col class="item-quantity" :span="3" style="margin-top: 20px">
+            <el-col class="item-quantity" :span="4" style="margin-top: 20px">
               <el-input-number
                 v-model="item.quantity"
                 :min="1"
@@ -471,7 +472,7 @@ onMounted(() => {
             </el-col>
 
             <!-- 小计 -->
-            <el-col class="item-subtotal" :span="3">
+            <el-col class="item-subtotal" :span="2">
               <span class="subtotal-amount"> ¥{{ (item.price * item.quantity).toFixed(2) }} </span>
             </el-col>
 
