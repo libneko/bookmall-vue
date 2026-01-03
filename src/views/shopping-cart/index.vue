@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, reactive } from 'vue'
-import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
+import { ElCol, ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'element-plus'
 import {
   getShoppingCartApi,
   updateCartItemApi,
@@ -14,8 +14,8 @@ import { bookApi } from '@/api/introduction'
 import { openBook } from '@/api/meta'
 import router from '@/router'
 import { Temporal } from '@js-temporal/polyfill'
-import { getProfile } from '@/api/profile'
 import { getLoginUser } from '@/utils/auth'
+import { getProfile } from '@/api/profile'
 
 // 加载状态
 const loading = ref(false)
@@ -488,8 +488,8 @@ onMounted(() => {
 
       <!-- 空购物车状态 -->
       <div v-if="cartItems.length === 0" class="empty-cart">
-        <el-empty description="购物车空空如也">
-          <el-button type="primary" @click="router.push('/')">去购物</el-button>
+        <el-empty description="借阅车空空如也">
+          <el-button type="primary" @click="router.push('/')">去借阅</el-button>
         </el-empty>
       </div>
     </el-card>
@@ -632,17 +632,17 @@ onMounted(() => {
   margin-left: 30px;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--el-border-color);
 }
 
 .cart-header h2 {
   margin: 0;
-  color: var(--color-heading);
+  color: var(--el-text-color-primary);
   font-size: 24px;
 }
 
 .selected-count {
-  color: var(--color-text);
+  color: var(--el-text-color-regular);
   font-size: 14px;
 }
 
@@ -678,20 +678,20 @@ onMounted(() => {
 }
 
 .store-items {
-  background-color: var(--color-background);
+  background-color: var(--el-bg-color);
 }
 
 .store-footer {
   display: flex;
   justify-content: flex-end;
   padding: 12px 20px;
-  background-color: var(--color-background-soft);
-  border-top: 1px solid var(--color-border);
+  background-color: var(--el-fill-color-light);
+  border-top: 1px solid var(--el-border-color);
 }
 
 .store-total {
   font-size: 14px;
-  color: var(--color-text);
+  color: var(--el-text-color-regular);
 }
 
 .store-total-price {
@@ -728,7 +728,7 @@ onMounted(() => {
   width: 80px;
   height: 80px;
   border-radius: 6px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--el-border-color-lighter);
 }
 
 .item-details {
@@ -739,7 +739,7 @@ onMounted(() => {
   margin: 0 0 8px 0;
   font-size: 14px;
   line-height: 1.4;
-  color: var(--color-heading);
+  color: var(--el-text-color-primary);
 }
 
 .product-specs {
@@ -748,12 +748,12 @@ onMounted(() => {
 
 .spec {
   display: inline-block;
-  background: var(--color-background-mute);
+  background: var(--el-fill-color-lighter);
   padding: 2px 6px;
   margin-right: 8px;
   border-radius: 3px;
   font-size: 12px;
-  color: var(--color-text);
+  color: var(--el-text-color-regular);
 }
 
 .product-tags {
@@ -775,10 +775,9 @@ onMounted(() => {
 .original-price {
   display: block;
   font-size: 12px;
-  color: var(--color-text);
+  color: var(--el-text-color-secondary);
   text-decoration: line-through;
   margin-top: 4px;
-  opacity: 0.6;
 }
 
 .item-quantity {
@@ -787,9 +786,8 @@ onMounted(() => {
 
 .stock-info {
   font-size: 12px;
-  color: var(--color-text);
+  color: var(--el-text-color-secondary);
   margin-top: 5px;
-  opacity: 0.6;
 }
 
 .item-subtotal {
@@ -823,18 +821,17 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 4px;
   font-size: 14px;
-  color: var(--color-heading);
+  color: var(--el-text-color-primary);
 }
 
 .option-bottom {
   font-size: 12px;
-  color: var(--color-text);
+  color: var(--el-text-color-secondary);
   line-height: 1.4;
   /* 超出省略号 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0.8;
 }
 
 .empty-cart {
@@ -849,9 +846,9 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background: var(--color-background);
-  border-top: 1px solid var(--color-border);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  background: var(--el-bg-color);
+  border-top: 1px solid var(--el-border-color);
+  box-shadow: var(--el-box-shadow-light);
   z-index: 1000;
 }
 

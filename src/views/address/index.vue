@@ -12,7 +12,6 @@ import {
 import type { AddressBook } from '@/api/types'
 import { regionData, codeToText } from 'element-china-area-data'
 import type { LoginToken } from '@/api/types'
-import { getLoginUser } from '@/utils/auth'
 
 const formRef = ref<FormInstance>()
 
@@ -33,7 +32,10 @@ const login_user = ref<LoginToken | null>(null)
 
 // 初始化用户信息
 if (typeof window !== 'undefined') {
-  login_user.value = getLoginUser()
+  const userData = localStorage.getItem('login_user')
+  if (userData) {
+    login_user.value = JSON.parse(userData) as LoginToken
+  }
 }
 
 // 表单数据 - 使用 ref
@@ -212,7 +214,11 @@ const formRules = ref({
   ],
   phone: [
     { required: true, message: '请输入手机号码', trigger: 'blur' },
-    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号码', trigger: 'blur' },
+    {
+      pattern: /^1[3-9]\d{9}$/,
+      message: '请输入正确的手机号码',
+      trigger: 'blur',
+    },
   ],
   detail: [
     { required: true, message: '请输入详细地址', trigger: 'blur' },
