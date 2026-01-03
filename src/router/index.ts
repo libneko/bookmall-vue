@@ -23,6 +23,7 @@ const router = createRouter({
           path: '/',
           name: 'index',
           component: IndexView,
+          meta: { title: '主页' },
         },
         {
           path: '/shopping-cart',
@@ -63,12 +64,21 @@ const router = createRouter({
         },
       ],
     },
-    { path: '/login', name: 'login', component: LoginView },
-    { path: '/register', name: 'register', component: RegisterView },
+    { path: '/login', name: 'login', component: LoginView, meta: { title: '登录' } },
+    { path: '/register', name: 'register', component: RegisterView, meta: { title: '注册' } },
   ],
 })
 
 router.beforeEach((to, _from, next) => {
+  const title = to.meta.title
+  if (to.name === 'index') {
+    document.title = '小书架'
+  } else if (title) {
+    document.title = `小书架 - ${title}`
+  } else {
+    document.title = '小书架'
+  }
+
   if (!isLoggedIn() && to.name !== 'login' && to.name !== 'register' && to.name !== 'index') {
     next({ name: 'login' })
   } else {
