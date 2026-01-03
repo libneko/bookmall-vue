@@ -487,8 +487,8 @@ onMounted(() => {
 
       <!-- 空购物车状态 -->
       <div v-if="cartItems.length === 0" class="empty-cart">
-        <el-empty description="借阅车空空如也">
-          <el-button type="primary" @click="router.push('/')">去借阅</el-button>
+        <el-empty description="购物车空空如也">
+          <el-button type="primary" @click="router.push('/')">去购物</el-button>
         </el-empty>
       </div>
     </el-card>
