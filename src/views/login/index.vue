@@ -2,6 +2,7 @@
 import { codeLoginApi, loginApi, sendCodeApi, sendEmailApi } from '@/api/login'
 import { isValidEmail } from '@/api/meta'
 import type { ApiResponse, LoginToken } from '@/api/types'
+import { setLoginUser } from '@/utils/auth'
 import { ElMessage } from 'element-plus'
 import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -98,7 +99,7 @@ const login = async () => {
   }
   if (result.code === 1) {
     ElMessage.success('登录成功')
-    localStorage.setItem('login_user', JSON.stringify(result.data))
+    setLoginUser(result.data)
     router.push('/')
   } else {
     ElMessage.error(result.message)

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { isLoggedIn } from '@/utils/auth'
 
 import IndexView from '@/views/index/index.vue'
 import LayoutView from '@/views/layout/index.vue'
@@ -66,11 +67,6 @@ const router = createRouter({
     { path: '/register', name: 'register', component: RegisterView },
   ],
 })
-
-function isLoggedIn(): boolean {
-  const user = localStorage.getItem('login_user')
-  return !!user
-}
 
 router.beforeEach((to, _from, next) => {
   if (!isLoggedIn() && to.name !== 'login' && to.name !== 'register' && to.name !== 'index') {

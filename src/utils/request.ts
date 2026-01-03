@@ -1,6 +1,7 @@
 import router from '@/router'
 import axios, { AxiosError } from 'axios'
 import { ElMessage } from 'element-plus'
+import { getLoginUser } from '@/utils/auth'
 
 const request = axios.create({
   baseURL: '/api',
@@ -9,7 +10,7 @@ const request = axios.create({
 
 request.interceptors.request.use(
   (config) => {
-    const login_user = JSON.parse(localStorage.getItem('login_user')!)
+    const login_user = getLoginUser()
     if (login_user && login_user.token) {
       config.headers.token = login_user.token
     }

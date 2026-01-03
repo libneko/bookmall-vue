@@ -4,6 +4,7 @@ import { Theme, setTheme as applyTheme } from '@/api/meta'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import NavMenu from '@/component/nav-menu.vue'
+import { getLoginUser, removeLoginUser } from '@/utils/auth'
 
 // 当前登录的员工
 const login_user = ref<LoginToken | null>(null)
@@ -30,7 +31,7 @@ const handleStorageChange = (event: StorageEvent) => {
 }
 
 onMounted(() => {
-  login_user.value = JSON.parse(localStorage.getItem('login_user')!) as LoginToken
+  login_user.value = getLoginUser()
   document.addEventListener('click', handleClickOutside)
   window.addEventListener('storage', handleStorageChange)
 })
@@ -42,7 +43,7 @@ onUnmounted(() => {
 
 // 退出登录
 const logout = () => {
-  localStorage.removeItem('login_user')
+  removeLoginUser()
   router.push('/login')
 }
 
@@ -78,7 +79,7 @@ const checkMobile = () => {
 }
 
 onMounted(() => {
-  login_user.value = JSON.parse(localStorage.getItem('login_user')!) as LoginToken
+  login_user.value = getLoginUser()
   document.addEventListener('click', handleClickOutside)
   window.addEventListener('storage', handleStorageChange)
   checkMobile()

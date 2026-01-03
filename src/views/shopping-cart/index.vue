@@ -15,6 +15,7 @@ import { openBook } from '@/api/meta'
 import router from '@/router'
 import { Temporal } from '@js-temporal/polyfill'
 import { getProfile } from '@/api/profile'
+import { getLoginUser } from '@/utils/auth'
 
 // 加载状态
 const loading = ref(false)
@@ -301,25 +302,22 @@ const clearCart = async () => {
 }
 
 const checkProfile = async () => {
-  const loginUserStr = localStorage.getItem('login_user')
-  if (loginUserStr) {
-    const loginUser = JSON.parse(loginUserStr)
-    if (loginUser && loginUser.id) {
-      try {
-        const res = await getProfile(loginUser.id)
-        console.log(res)
-        if (res.code === 1) {
-          if (res.data.phone === null) {
-            ElMessage.error('您的个人信息不完整，请先完善个人信息')
-          } else {
-            ischeck.value = 1
-          }
+  const loginUser = getLoginUser()
+  if (loginUser && loginUser.id) {
+    try {
+      const res = await getProfile(loginUser.id)
+      console.log(res)
+      if (res.code === 1) {
+        if (res.data.phone === null) {
+          ElMessage.error('您的个人信息不完整，请先完善个人信息')
         } else {
-          ElMessage.error(res.message || '获取用户信息失败')
+          ischeck.value = 1
         }
-      } catch (error) {
-        console.error(error)
+      } else {
+        ElMessage.error(res.message || '获取用户信息失败')
       }
+    } catch (error) {
+      console.error(error)
     }
   }
 }

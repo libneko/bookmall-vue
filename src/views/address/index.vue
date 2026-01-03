@@ -12,7 +12,7 @@ import {
 import type { AddressBook } from '@/api/types'
 import { regionData, codeToText } from 'element-china-area-data'
 import type { LoginToken } from '@/api/types'
-
+import { getLoginUser } from '@/utils/auth'
 
 const formRef = ref<FormInstance>()
 
@@ -33,10 +33,7 @@ const login_user = ref<LoginToken | null>(null)
 
 // 初始化用户信息
 if (typeof window !== 'undefined') {
-  const userData = localStorage.getItem('login_user')
-  if (userData) {
-    login_user.value = JSON.parse(userData) as LoginToken
-  }
+  login_user.value = getLoginUser()
 }
 
 // 表单数据 - 使用 ref

@@ -8,6 +8,7 @@ import { registerApi } from '@/api/register'
 import AuthLayout from '@/component/auth-layout.vue'
 import { createConfirmPasswordValidator, isValidEmail } from '@/api/meta'
 import { sendCodeApi, sendEmailApi } from '@/api/login'
+import { setLoginUser } from '@/utils/auth'
 
 const registerForm = ref<RegisterForm>({
   email: '',
@@ -74,7 +75,7 @@ const register = async () => {
   console.log(result)
   if (result.code === 1) {
     ElMessage.success('注册成功')
-    localStorage.setItem('login_user', JSON.stringify(result.data))
+    setLoginUser(result.data)
     // 跳转页面 - 首页
     router.push('/')
   } else {

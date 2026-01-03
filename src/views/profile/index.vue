@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { createConfirmPasswordValidator, validatePhone, validateEmail } from '@/api/meta'
 import { getProfile, updateProfile, upload } from '@/api/profile'
-import type { LoginToken, User } from '@/api/types'
+import type { User } from '@/api/types'
+import { getLoginUser, setLoginUser } from '@/utils/auth'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { computed, onMounted, reactive, ref } from 'vue'
 
@@ -122,22 +123,19 @@ const isChanged = computed(() => {
   return isProfileChanged || isPasswordChanged
 })
 onMounted(async () => {
-  const loginUserStr = localStorage.getItem('login_user')
-  if (loginUserStr) {
-    const loginUser = JSON.parse(loginUserStr)
-    if (loginUser && loginUser.id) {
-      try {
-        const res = await getProfile(loginUser.id)
-        if (res.code === 1) {
-          console.log('用户信息：', res.data)
-          Object.assign(form, res.data)
-          originalFormStr.value = JSON.stringify(form)
-        } else {
-          ElMessage.error(res.message || '获取用户信息失败')
-        }
-      } catch (error) {
-        console.error(error)
+  const loginUser = getLoginUser()
+  if (loginUser && loginUser.id) {
+    try {
+      const res = await getProfile(loginUser.id)
+      if (res.code === 1) {
+        console.log('用户信息：', res.data)
+        Object.assign(form, res.data)
+        originalFormStr.value = JSON.stringify(form)
+      } else {
+        ElMessage.error(res.message || '获取用户信息失败')
       }
+    } catch (error) {
+      console.error(error)
     }
   }
 })
@@ -177,17 +175,15 @@ const save = async () => {
       setTimeout(() => {
         location.reload()
       }, 1000)
-      const storedStr = localStorage.getItem('login_user')
+      const storedUser = getLoginUser()
 
-      if (storedStr) {
-        const storedUser: LoginToken = JSON.parse(storedStr)
-
+      if (storedUser) {
         storedUser.avatar = form.avatar
         storedUser.username = form.username
         storedUser.email = form.email
         storedUser.id = form.id
 
-        localStorage.setItem('login_user', JSON.stringify(storedUser))
+        setLoginUser(storedUser)
       }
     } else {
       ElMessage.error(res.message || '更新失败')
