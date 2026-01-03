@@ -19,7 +19,7 @@ export const isValidEmail = (email: string): boolean => {
 }
 
 export const createConfirmPasswordValidator = (getOriginalPassword: () => string) => {
-  return (rule: InternalRuleItem, value: string, callback: (error?: Error) => void) => {
+  return (_rule: InternalRuleItem, value: string, callback: (error?: Error) => void) => {
     if (!value) {
       callback(new Error('请再次输入密码'))
     } else if (value.length < 8) {
@@ -34,7 +34,7 @@ export const createConfirmPasswordValidator = (getOriginalPassword: () => string
   }
 }
 
-export const validatePhone = (rule: any, value: string, callback: any) => {
+export const validatePhone = (_rule: any, value: string, callback: any) => {
   if (!value) {
     callback(new Error('请输入手机号'))
   } else if (!/^1[3-9]\d{9}$/.test(value)) {
@@ -44,7 +44,7 @@ export const validatePhone = (rule: any, value: string, callback: any) => {
   }
 }
 
-export const validateEmail = (rule: any, value: string, callback: any) => {
+export const validateEmail = (_rule: any, value: string, callback: any) => {
   const safeValue = value ? value.trim() : ''
 
   if (!safeValue) {

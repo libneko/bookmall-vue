@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import {
@@ -14,7 +13,7 @@ import type { AddressBook } from '@/api/types'
 import { regionData, codeToText } from 'element-china-area-data'
 import type { LoginToken } from '@/api/types'
 
-const router = useRouter()
+
 const formRef = ref<FormInstance>()
 
 // 定义AreaOption类型
