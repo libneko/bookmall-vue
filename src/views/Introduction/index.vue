@@ -82,7 +82,7 @@ const handleChange = (value: number) => {
           </div>
           <div class="books-buy">
             <el-input-number v-model="num" :min="1" :max="book?.stock" @change="handleChange" />
-            <el-button type="primary" @click="addShopping(shopp)">加入借阅车</el-button>
+            <el-button type="primary" @click="addShopping(shopp)">加入购物车</el-button>
           </div>
         </div>
       </div>

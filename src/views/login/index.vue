@@ -105,10 +105,6 @@ const login = async () => {
   }
 }
 
-const forgot = async () => {
-  ElMessage.success('功能未实现')
-}
-
 const register = () => {
   router.push('/register')
 }

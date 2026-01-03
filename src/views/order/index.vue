@@ -9,8 +9,7 @@ import {
 import type { Order, SendOrder } from '@/api/types'
 import { OrderStatus, OrderStatusMap } from '@/utils/status'
 import { ElMessage, ElMessageBox, type CollapseModelValue } from 'element-plus'
-import type { el } from 'element-plus/es/locales.mjs'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const dialogVisible = ref(false)
 const currentPage = ref(1) // 当前页码

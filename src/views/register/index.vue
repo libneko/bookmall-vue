@@ -6,12 +6,7 @@ import { useRouter } from 'vue-router'
 import type { FormRules, FormInstance } from 'element-plus'
 import { registerApi } from '@/api/register'
 import AuthLayout from '@/component/auth-layout.vue'
-import {
-  createConfirmPasswordValidator,
-  isValidEmail,
-  validateEmail,
-  validatePhone,
-} from '@/api/meta'
+import { createConfirmPasswordValidator, isValidEmail } from '@/api/meta'
 import { sendCodeApi, sendEmailApi } from '@/api/login'
 
 const registerForm = ref<RegisterForm>({

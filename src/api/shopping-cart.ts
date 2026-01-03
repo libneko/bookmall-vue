@@ -1,6 +1,5 @@
 import request from '@/utils/request'
 import type {
-  ShoppingDeleteForm,
   UpdateCartForm,
   ShoppingCartItem,
   BookData,

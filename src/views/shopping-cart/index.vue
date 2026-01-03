@@ -9,14 +9,7 @@ import {
   SubmitOrderApi,
   getAddressApi,
 } from '@/api/shopping-cart'
-import type {
-  AddressBook,
-  ApiResponse,
-  Product,
-  SubmitOrder,
-  ShoppingCartItem,
-  Store,
-} from '@/api/types'
+import type { AddressBook, Product, SubmitOrder, Store } from '@/api/types'
 import { bookApi } from '@/api/introduction'
 import { openBook } from '@/api/meta'
 import router from '@/router'

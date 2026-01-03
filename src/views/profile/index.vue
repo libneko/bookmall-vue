@@ -69,9 +69,6 @@ const formRef = ref<FormInstance>()
 const handleEditPhone = () => {
   isPhoneEditing.value = true
 }
-const handleEditEmail = () => {
-  isEmailEditing.value = true
-}
 const handleEditPassword = () => {
   isPasswordEditing.value = true
 }

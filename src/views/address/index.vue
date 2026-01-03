@@ -2,7 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-import { ArrowLeft, Plus } from '@element-plus/icons-vue'
+import { Plus } from '@element-plus/icons-vue'
 import {
   getAddressApi,
   saveAddressApi,
@@ -352,11 +352,6 @@ const setDefaultAddress = async (id: number) => {
   } catch (error) {
     ElMessage.error('网络错误，请稍后重试')
   }
-}
-
-// 返回上一页
-const goBack = () => {
-  router.go(-1)
 }
 
 // 计算完整的地址字符串

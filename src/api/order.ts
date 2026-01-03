@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-import type { ApiResponse, GetOrders, Order, PayInfo, SendOrder } from './types'
+import type { ApiResponse, GetOrders, PayInfo, SendOrder } from './types'
 
 export const getOrder = (data: SendOrder): Promise<ApiResponse<GetOrders>> => {
   const params = new URLSearchParams()
